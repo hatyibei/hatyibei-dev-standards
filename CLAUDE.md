@@ -64,16 +64,16 @@ CI: Codex Action 自動起動 → AGENTS.md の基準でレビュー
 朝: P0 → Request Changes / P0 なし → Approve → レビュー済み PR が待っている
 ```
 
-- 認証: Codex Cloud のアカウント連携（API Key 不要、ChatGPT Plus/Pro に含まれる）
-- レビュー基準: `AGENTS.md` の Review guidelines セクション（P0/P1/P2）
-- 設定: `.codex/config.toml`
-- 起動: PR コメントで `@codex review` or 自動レビュー ON
+- ワークフロー: `.github/workflows/codex-review.yml` (PR open/sync/reopen で自動起動)
+- プロンプト: `.github/codex/prompts/review.md`
+- レビュー基準: `AGENTS.md` の Review guidelines (P0/P1/P2)
+- 認証: `OPENAI_API_KEY` を GitHub Secrets に設定
 
-**各repoへの導入（1コマンド）:**
+**各repoへの導入:**
 ```bash
 cd ~/Claude/対象プロジェクト && bash ~/Claude/hatyibei-dev-standards/install.sh
+gh secret set OPENAI_API_KEY -R hatyibei/対象リポジトリ
 ```
-→ `AGENTS.md` + `.codex/config.toml` を配置。あとは Codex Cloud の設定画面でリポジトリを有効化するだけ。
 
 ## ファイル構造
 
@@ -122,11 +122,12 @@ archive/                       ← 退避（git history 保持、削除ではな
   unused-configs/              ← 5 configs + ecc-rules
   reference-docs/              ← claude-mem, aidlc, superpowers
 
-AGENTS.md                      ← Codex 用レビュー基準（P0/P1/P2 + セキュリティ）
+AGENTS.md                      ← Codex 用レビュー基準 (P0/P1/P2)
+.github/
+  workflows/codex-review.yml   ← PR 自動レビュー (openai/codex-action@v1)
+  codex/prompts/review.md      ← レビュープロンプト
 .codex/config.toml             ← Codex プロジェクト設定
-templates/
-  AGENTS.md                    ← 各repo配布用テンプレート
-install.sh                     ← 1コマンドインストーラー
+install.sh                     ← 各repo導入スクリプト
 
 docs/adr/                      ← ADR-001〜009（変更なし）
 actually_used.md               ← 使用実態レポート（選定の根拠データ）
