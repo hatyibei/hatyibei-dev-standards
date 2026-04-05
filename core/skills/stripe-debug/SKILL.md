@@ -3,7 +3,7 @@ name: stripe-debug
 description: Stripe Webhook・課金問題をデバッグする
 origin: self
 allowed-tools: Bash(stripe:*), Bash(curl:*), Read, Glob, Grep
-argument-hint: 対象 (例: webhook, subscription, plan) デフォルト: webhook
+argument-hint: "対象 (例: webhook, subscription, plan) デフォルト: webhook"
 ---
 
 Stripeの課金フロー（Webhook、サブスクリプション、プラン反映）の問題を調査・デバッグする。

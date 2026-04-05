@@ -3,7 +3,7 @@ name: spec-review
 description: プロダクトの完成度・マネタイズ準備状況を監査する
 origin: self
 allowed-tools: Read, Glob, Grep, Bash(curl:*), Bash(gh:*), WebSearch
-argument-hint: フォーカス (例: billing, ux, security, all) デフォルト: all
+argument-hint: "フォーカス (例: billing, ux, security, all) デフォルト: all"
 ---
 
 プロダクトが「お金をもらえるレベル」に達しているかを体系的に監査する。

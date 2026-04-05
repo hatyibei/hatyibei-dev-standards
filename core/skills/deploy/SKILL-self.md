@@ -3,7 +3,7 @@ name: deploy
 description: Cloud Run / Firebase へのデプロイ＆反映確認を自動化
 origin: self
 allowed-tools: Bash(gcloud:*), Bash(gh:*), Bash(git:*), Bash(curl:*), Read, Glob, Grep
-argument-hint: 対象 (例: cloud-run, firebase, auto) デフォルト: auto
+argument-hint: "対象 (例: cloud-run, firebase, auto) デフォルト: auto"
 ---
 
 プロジェクトをデプロイし、本番環境への反映を確認する。

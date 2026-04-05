@@ -220,12 +220,7 @@ Never skip the RED phase. Never write code before tests.
 - Use `/code-review` to review implementation
 - Use `/test-coverage` to verify coverage
 
-## Related Agents
+## Related
 
-This command invokes the `tdd-guide` agent provided by ECC.
-
-The related `tdd-workflow` skill is also bundled with ECC.
-
-For manual installs, the source files live at:
-- `agents/tdd-guide.md`
-- `skills/tdd-workflow/SKILL.md`
+- TDD ワークフローの詳細: `core/skills/e2e-test/SKILL.md` 内の tdd-workflow セクション
+- 実行は `general-purpose` サブエージェントに具体的な指示を渡す形式を推奨
