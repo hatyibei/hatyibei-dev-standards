@@ -110,6 +110,47 @@ gh secret set OPENAI_API_KEY -R hatyibei/対象リポジトリ
 | `post-session.sh` | SessionEnd | inbox/ → daily/ に転記、inbox/ クリア |
 | `memory-freshen.sh` | cron 毎日06:00 | 7日超の daily → summaries に Haiku 要約圧縮 |
 | `memory-compost.sh` | cron 90日ごと | 90日超を compost/ に移動、365日超を完全削除 |
+| `memory-score.sh` | post-session後 + cron毎日 | キーワードでimportance算出 + 日次×0.95減衰 |
+| `memory-router.sh` | 手動 or watch | Haiku で domain 分類、confidence<0.7 で Opus エスカレーション |
+
+### importance スコアリング
+
+daily/ の各エントリに YAML frontmatter で重要度を付与:
+```yaml
+---
+date: 2026-04-10
+importance: 1.8
+freshness: fresh
+---
+```
+
+**加算ルール:**
+| キーワード | 加算 |
+|-----------|------|
+| 基礎 | 1.0 |
+| 意思決定 (decided, chose, rejected, 決定, 判断) | +0.5 |
+| アーキテクチャ (architect, 設計, ADR, migration) | +0.3 |
+| セキュリティ (security, 脆弱性, CVE, XSS) | +0.3 |
+| エラー・修正 (error, bug, fix, 障害) | +0.2 |
+| パフォーマンス (latency, cache, 最適化) | +0.2 |
+| コスト (cost, pricing, budget) | +0.2 |
+
+**減衰:** 毎日 importance × 0.95。0.1 未満は 0.0 に切り捨て。
+
+### Haiku→Opus ルーティング
+
+inbox/ のエントリを自動分類:
+1. **Haiku** で domain (dev/product/biz) + importance + confidence を算出
+2. **confidence < 0.7** → **Opus** にエスカレーションして再分類
+3. 分類結果を `domains/{domain}/learnings.md` に蓄積
+
+```bash
+# ワンショット実行
+bash .harness/hooks/memory-router.sh
+
+# 10分ごとの監視モード
+bash .harness/hooks/memory-router.sh watch
+```
 
 ### セッション中の学びの記録方法
 

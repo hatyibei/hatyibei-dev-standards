@@ -66,9 +66,9 @@ compost/ (削除候補)
 
 ## 実装フェーズ
 
-- **Phase 1-3** (本ADR): ディレクトリ構造 + フック3本 + Tier構造 ← **実装済み**
-- **Phase 4** (将来): importance スコアリング (YAML frontmatter, 減衰関数)
-- **Phase 5** (将来): Haiku→Opus ルーティング (confidence < 0.7 でエスカレーション)
+- **Phase 1-3**: ディレクトリ構造 + フック3本 + Tier構造 ← **実装済み**
+- **Phase 4**: importance スコアリング (YAML frontmatter, キーワード加算, 日次×0.95減衰) ← **実装済み**
+- **Phase 5**: Haiku→Opus ルーティング (confidence < 0.7 でエスカレーション) ← **実装済み**
 
 ## 影響
 
