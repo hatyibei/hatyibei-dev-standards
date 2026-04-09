@@ -16,3 +16,10 @@ Thumbs.db
 
 # Node
 node_modules/
+
+# Memory (個人の記憶はリポジトリに入れない。構造の .gitkeep のみ追跡)
+.harness/memory/inbox/*.md
+.harness/memory/daily/*.md
+.harness/memory/summaries/*.md
+.harness/memory/domains/**/*.md
+.harness/memory/compost/*.md

@@ -14,6 +14,8 @@ hatyibei 個人開発標準のアーキテクチャ判断記録。
 | ADR-006 | [サブエージェント駆動開発](./ADR-006-subagent-driven-development.md) | accepted |
 | ADR-007 | [コードレビュープロトコル](./ADR-007-code-review-protocol.md) | accepted |
 | ADR-008 | [品質ゲートと適応的深度](./ADR-008-quality-gates-and-adaptive-depth.md) | accepted |
+| ADR-009 | [Core選定基準](./ADR-009-core-selection-criteria.md) | accepted |
+| ADR-010 | [記憶管理レイヤー](./ADR-010-memory-management-layer.md) | accepted |
 
 ## ADRテンプレート
 
