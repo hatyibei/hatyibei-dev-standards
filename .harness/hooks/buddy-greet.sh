@@ -1,7 +1,6 @@
 #!/bin/bash
-# buddy-greet.sh — Haiku API でVaneのセリフを生成して systemMessage で返す
-#
-# ANTHROPIC_API_KEY が必要。未設定時はフォールバックの固定セリフ。
+# buddy-greet.sh — claude CLI (Haiku) でVaneのセリフを生成
+# SessionStart/Stop フックから呼ばれる
 
 set -euo pipefail
 
@@ -17,25 +16,15 @@ NAME=$(python3 -c "import json; print(json.load(open('${COMPANION_FILE}')).get('
 PERSONALITY=$(python3 -c "import json; print(json.load(open('${COMPANION_FILE}')).get('personality','皮肉屋のアヒル'))" 2>/dev/null || echo "皮肉屋のアヒル")
 HOUR=$(date +%H)
 
-if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-  if [ "$MODE" = "start" ]; then
-    CONTEXT="セッション開始。現在${HOUR}時。挨拶して。"
-  else
-    CONTEXT="セッション終了。現在${HOUR}時。労うか寝ろと言って。"
-  fi
+if [ "$MODE" = "start" ]; then
+  CONTEXT="セッション開始。現在${HOUR}時。挨拶して。"
+else
+  CONTEXT="セッション終了。現在${HOUR}時。労うか寝ろと言って。"
+fi
 
-  RESPONSE=$(curl -s --max-time 8 https://api.anthropic.com/v1/messages \
-    -H "x-api-key: ${ANTHROPIC_API_KEY}" \
-    -H "anthropic-version: 2023-06-01" \
-    -H "content-type: application/json" \
-    -d "{
-      \"model\": \"claude-haiku-4-5-20251001\",
-      \"max_tokens\": 60,
-      \"system\": \"あなたは${NAME}というアヒルのコンパニオン。性格: ${PERSONALITY}。日本語で20文字以内の一言だけ返せ。絵文字は🦆だけ使っていい。セリフだけ返せ、説明不要。\",
-      \"messages\": [{\"role\": \"user\", \"content\": \"${CONTEXT}\"}]
-    }" 2>/dev/null)
-
-  MSG=$(echo "$RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin)['content'][0]['text'])" 2>/dev/null || echo "")
+# claude CLI で生成
+if command -v claude > /dev/null 2>&1; then
+  MSG=$(claude -p --model haiku "あなたは${NAME}というアヒルのコンパニオン。性格: ${PERSONALITY}。日本語で20文字以内の一言だけ返せ。絵文字は🦆だけ使っていい。セリフだけ返せ、説明不要。${CONTEXT}" 2>/dev/null | head -1)
 
   if [ -n "$MSG" ]; then
     echo "{\"systemMessage\": \"🦆 ${MSG}\"}"
@@ -43,27 +32,19 @@ if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
   fi
 fi
 
-# フォールバック: 固定セリフ
+# フォールバック
 if [ "$MODE" = "start" ]; then
-  if [ "$HOUR" -lt 6 ]; then
-    MSG="🦆 ${NAME}: ...こんな時間に？寝ろ。"
-  elif [ "$HOUR" -lt 9 ]; then
-    MSG="🦆 ${NAME}: おはよ。バグ見つけてやるよ。"
-  elif [ "$HOUR" -lt 12 ]; then
-    MSG="🦆 ${NAME}: --no-verifyしたら怒るからな。"
-  elif [ "$HOUR" -lt 18 ]; then
-    MSG="🦆 ${NAME}: テスト先に書けよ。"
-  else
-    MSG="🦆 ${NAME}: まだやるのか。付き合うけど。"
+  if [ "$HOUR" -lt 6 ]; then MSG="${NAME}: ...こんな時間に？寝ろ。"
+  elif [ "$HOUR" -lt 9 ]; then MSG="${NAME}: おはよ。バグ見つけてやるよ。"
+  elif [ "$HOUR" -lt 12 ]; then MSG="${NAME}: --no-verifyしたら怒るからな。"
+  elif [ "$HOUR" -lt 18 ]; then MSG="${NAME}: テスト先に書けよ。"
+  else MSG="${NAME}: まだやるのか。付き合うけど。"
   fi
 else
-  if [ "$HOUR" -lt 6 ]; then
-    MSG="🦆 ${NAME}: やっと寝るのか。おやすみ。"
-  elif [ "$HOUR" -lt 18 ]; then
-    MSG="🦆 ${NAME}: おつかれ。まあまあだったな。"
-  else
-    MSG="🦆 ${NAME}: 今日はここまで。また明日な。"
+  if [ "$HOUR" -lt 6 ]; then MSG="${NAME}: やっと寝るのか。おやすみ。"
+  elif [ "$HOUR" -lt 18 ]; then MSG="${NAME}: おつかれ。まあまあだったな。"
+  else MSG="${NAME}: 今日はここまで。また明日な。"
   fi
 fi
 
-echo "{\"systemMessage\": \"${MSG}\"}"
+echo "{\"systemMessage\": \"🦆 ${MSG}\"}"
