@@ -173,7 +173,7 @@ fresh (0-7日) → summarized (7-90日) → composted (90-365日) → deleted (3
 
 ```
 core/                          ← 常時ロード（18ファイル）
-  skills/                      ← 実発火実績のある10 skill
+  skills/                      ← 実発火実績のある10 skill + 自走型 1 skill
     deploy/                    ← 6 Skill calls, commit 22件
     ux-audit/                  ← 4 Skill + 9 手入力, Playwright巡回
     security-audit/            ← 2 Skill + 7 手入力, Round 1-5監査
@@ -184,6 +184,7 @@ core/                          ← 常時ロード（18ファイル）
     ci-status/                 ← CI障害時の原因分析
     stripe-debug/              ← Stripe Webhook障害デバッグ
     commit-push-pr/            ← PR作成・リリース時
+    review-fix-loop/           ← 新設 (2026-04-15), 並列自走用 — 張り付き監視を手放す
   commands/                    ← 実発火実績のある4 command
     plan.md                    ← PlanMode 11セッション
     tdd.md                     ← TDD workflow shim
