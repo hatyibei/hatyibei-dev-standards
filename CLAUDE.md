@@ -21,6 +21,7 @@
 - **standard** (機能追加/バグ修正): 計画 → TDD → レビュー → コミット
 - **comprehensive** (アーキテクチャ変更): ブレスト → 設計 → 計画 → TDD → 2段階レビュー → コミット
   → advisor パターン参照: [extended/skills/advisor-strategy/SKILL.md](./extended/skills/advisor-strategy/SKILL.md)
+  → empirical-prompt-tuning 参照: extended/skills/empirical-prompt-tuning/SKILL.md（新規/大幅改訂 skill 作成時に適用）
 
 ## サブエージェント活用
 
@@ -202,6 +203,7 @@ core/                          ← 常時ロード（18ファイル）
 extended/                      ← 明示的に呼んだときだけロード
   skills/
     advisor-strategy/          ← 判断エスカレーション運用パターン (ADR-011)
+    empirical-prompt-tuning/     ← skill品質のiterative tuning (ADR-012)
   commands/
     verify.md                  ← quality-gate + CI で代替可能
     refactor-clean.md          ← simplify で代替可能

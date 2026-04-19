@@ -1,0 +1,20 @@
+# 収束判定閾値（upstream デフォルトと一致）
+convergence:
+  accuracy_delta_max: 3       # 精度改善 +3pt 以下で飽和扱い
+  steps_variation_max: 10     # ステップ数 ±10% 以内
+  duration_variation_max: 15  # duration ±15% 以内
+  consecutive_clears: 2       # 連続クリア回数
+
+# hold-out シナリオ設定
+holdout:
+  scenarios_default: 1
+  scenarios_robustness_required: 3
+  consecutive_clears_robustness_required: 3
+
+# シナリオ最小本数
+scenarios:
+  min: 2
+  recommended: 3
+
+# コスト上限
+max_iterations: 5
