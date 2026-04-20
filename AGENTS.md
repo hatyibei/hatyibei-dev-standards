@@ -5,10 +5,15 @@
 ## Project structure
 
 ```
-core/           — skills 10, commands 4, agent 1, hooks 3, rules 1
-extended/       — 参照専用 commands 5, agent 1
-archive/        — 未使用定義の退避 (633 files)
-docs/adr/       — ADR-001〜009
+core/              — skills 11, commands 4, agent 1, hooks 3, rules 1 (不可侵)
+extended/          — 参照専用 skills 1, commands 5, agent 1 (不可侵)
+archive/           — 未使用定義の退避 (633 files, 不可侵)
+agent/             — personality (Vane) + self-improvement loop
+tools/             — lib/search/curation/personality shell utilities
+skills/_generated/ — Opus 生成候補 (未検証、PR マージは P0 ブロック)
+plans/             — PlanMode 実装計画アーカイブ
+cron/              — 定期実行ジョブ集約
+docs/adr/          — ADR-001〜012
 ```
 
 ## Coding standards
@@ -39,6 +44,7 @@ docs/adr/       — ADR-001〜009
 - SQL / コマンド / プロンプトインジェクション
 - `console.log` に個人情報・認証情報を出力
 - ビルドが通らない変更
+- `skills/_generated/**` に配置された未検証スキルの `core/` / `extended/` への直接取り込み（手動 `promote.sh` を経ずに）
 
 ### P1 — Flag（指摘して修正を求める）
 
