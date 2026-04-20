@@ -44,7 +44,19 @@ if command -v claude > /dev/null 2>&1; then
   fi
 fi
 
-# フォールバック
+# フォールバック 1: quip.sh (agent/personality/) があればそれを使う
+QUIP_SCRIPT="${HARNESS_ROOT}/../tools/personality/quip.sh"
+if [ -x "$QUIP_SCRIPT" ]; then
+  MOOD=$(bash "$QUIP_SCRIPT" idle 2>/dev/null | head -1 || echo "")
+  if [ -n "$MOOD" ]; then
+    RESULT="${NAME} ${MOOD#🦆 }"
+    echo "$RESULT" > "$CACHE_FILE"
+    echo "$RESULT"
+    exit 0
+  fi
+fi
+
+# フォールバック 2: 時間帯固定
 if [ "$HOUR" -lt 6 ]; then MOOD="😴 zzz..."
 elif [ "$HOUR" -lt 9 ]; then MOOD="🥱 おはよ..."
 elif [ "$HOUR" -lt 12 ]; then MOOD="🦆 調子いいよ"
