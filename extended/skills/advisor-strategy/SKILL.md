@@ -1,27 +1,27 @@
 ---
 name: advisor-strategy
-description: 判断エスカレーション — Anthropic advisor tool + cross-vendor reviewer の運用パターン
+description: Decision escalation — operational pattern for Anthropic advisor tool + cross-vendor reviewer
 origin: self
 ---
 
 # Advisor Strategy
 
-executor モデルが主体的に動き、判断に詰まったときだけ advisor にエスカレーションする運用パターン。
+An operational pattern where the executor model drives the work autonomously and escalates to an advisor only when stuck on a decision.
 
-## SubAgent / Advisor / Reviewer の使い分け
+## When to Use SubAgent / Advisor / Reviewer
 
-| 目的 | パターン | 使うもの |
-|------|---------|---------|
-| 作業を分割したい | SubAgent | Agent tool (Explore/Plan/General) |
-| 判断を仰ぎたい（作業中） | Advisor | advisor tool (API, 同期) |
-| 品質を検証したい（作業後） | Reviewer | Codex / code-review skill (非同期) |
-| 分割 + 判断 | SubAgent + Advisor | SubAgent 内で advisor を呼ぶ |
+| Purpose | Pattern | What to Use |
+|---------|---------|-------------|
+| Split up work | SubAgent | Agent tool (Explore/Plan/General) |
+| Seek judgment (mid-work) | Advisor | advisor tool (API, synchronous) |
+| Verify quality (post-work) | Reviewer | Codex / code-review skill (asynchronous) |
+| Split + judgment | SubAgent + Advisor | Call advisor from inside a SubAgent |
 
-**境界ルール**: advisor = 作業中のリアルタイム判断。reviewer = 作業後の品質検証。この2つを混同しない。
+**Boundary rule**: advisor = real-time judgment during work. reviewer = quality verification after work. Do not conflate the two.
 
 ## Layer 1: Anthropic Advisor Tool
 
-### API 呼び出しパターン
+### API Call Pattern
 
 **Python:**
 
@@ -71,9 +71,9 @@ const response = await client.beta.messages.create({
 });
 ```
 
-### モデルペア互換表
+### Model Pair Compatibility
 
-advisor は **Opus 4.6 のみ**。Sonnet を advisor にすることはできない。
+The advisor must be **Opus 4.6 only**. Sonnet cannot be used as the advisor.
 
 | Executor | Advisor |
 |----------|---------|
@@ -81,17 +81,17 @@ advisor は **Opus 4.6 のみ**。Sonnet を advisor にすることはできな
 | `claude-sonnet-4-6` | `claude-opus-4-6` |
 | `claude-opus-4-6` | `claude-opus-4-6` |
 
-### max_uses 推奨値
+### Recommended max_uses
 
-| ユースケース | max_uses | 根拠 |
-|------------|----------|------|
-| コーディング | 2-3 | 初回計画 + 完了前確認。公式ベンチマークで最高効率 |
-| 長いエージェントループ | 5 | 方針転換判断を含む |
-| 短い Q&A | 設定不要 | advisor のオーバーヘッドが見合わない |
+| Use Case | max_uses | Rationale |
+|----------|----------|-----------|
+| Coding | 2-3 | Initial plan + pre-completion check. Highest efficiency in official benchmarks |
+| Long agent loops | 5 | Includes course-correction judgments |
+| Short Q&A | Not needed | Advisor overhead does not pay off |
 
-### caching 設定
+### Caching Configuration
 
-3回以上の advisor 呼び出しが見込まれる会話で有効化。2回以下では書き込みコストが読み取り節約を上回る。
+Enable when three or more advisor calls are expected in the conversation. With two or fewer, write cost exceeds read savings.
 
 ```python
 tools=[
@@ -104,11 +104,11 @@ tools=[
 ]
 ```
 
-会話途中で caching を on/off 切り替えるとキャッシュミスが発生する。最初から設定して変えない。
+Toggling caching on/off mid-conversation causes cache misses. Set it up front and do not change it.
 
-### Executor システムプロンプトテンプレート
+### Executor System Prompt Template
 
-以下を executor のシステムプロンプト冒頭に配置する（公式推奨）:
+Place the following at the top of the executor's system prompt (officially recommended):
 
 ```text
 You have access to an `advisor` tool backed by a stronger reviewer model. It takes NO parameters — when you call advisor(), your entire conversation history is automatically forwarded.
@@ -121,7 +121,7 @@ Also call advisor:
 - When considering a change of approach.
 ```
 
-advice の扱い方（上記の直後に配置）:
+How to handle advice (place immediately after the above):
 
 ```text
 Give the advice serious weight. If you follow a step and it fails empirically, or you have primary-source evidence that contradicts a specific claim, adapt.
@@ -129,15 +129,15 @@ Give the advice serious weight. If you follow a step and it fails empirically, o
 If you've already retrieved data pointing one way and the advisor points another: don't silently switch. Surface the conflict in one more advisor call.
 ```
 
-コスト削減オプション（advisor 出力を ~35-45% 削減）:
+Cost-reduction option (cuts advisor output ~35-45%):
 
 ```text
 The advisor should respond in under 100 words and use enumerated steps, not explanations.
 ```
 
-### レスポンス構造
+### Response Structure
 
-advisor 呼び出し成功時:
+On a successful advisor call:
 
 ```json
 {
@@ -148,60 +148,60 @@ advisor 呼び出し成功時:
 }
 ```
 
-→ `advisor_tool_result` が返る。`input` は常に空。executor が何を入れても advisor には届かない。
+→ An `advisor_tool_result` is returned. `input` is always empty. Whatever the executor puts in will not reach the advisor.
 
-multi-turn では `advisor_tool_result` ブロックをそのまま次のリクエストに含める。advisor tool を `tools` から外す場合は `advisor_tool_result` ブロックも履歴から除去すること（400 エラー回避）。
+In multi-turn flows, include the `advisor_tool_result` block as-is in the next request. If you remove the advisor tool from `tools`, also remove the `advisor_tool_result` block from history (to avoid 400 errors).
 
-## Beta 期間の注意
+## Beta Period Notes
 
-> **このセクションは GA 移行時にセクションごと削除する。**
+> **Delete this entire section upon GA transition.**
 
 - Beta header: `advisor-tool-2026-03-01`
-- API 呼び出し: `client.beta.messages.create()` を使用
-- betas パラメータ: `["advisor-tool-2026-03-01"]`
+- API call: use `client.beta.messages.create()`
+- betas parameter: `["advisor-tool-2026-03-01"]`
 - tool type: `"advisor_20260301"`
 
-**GA 移行時のチェックリスト:**
-1. `client.beta.messages.create()` → `client.messages.create()` に変更
-2. `betas` パラメータを削除
-3. tool type の `_20260301` サフィックスが変更されるか確認
-4. このセクションを削除
+**GA transition checklist:**
+1. Change `client.beta.messages.create()` → `client.messages.create()`
+2. Remove the `betas` parameter
+3. Check whether the `_20260301` suffix on tool type changes
+4. Delete this section
 
 ## Layer 2: Cross-vendor Reviewer
 
-既存の GAN-Style 交差検証 (Claude Code → Codex review) の位置づけ。
+Position of the existing GAN-Style cross-verification (Claude Code → Codex review).
 
 ```
-夜間: Claude Code → feature branch にコード → PR 作成
+Night: Claude Code → code on feature branch → PR created
   ↓
-CI: Codex Action 自動起動 → AGENTS.md の基準でレビュー
+CI: Codex Action auto-triggers → review per AGENTS.md criteria
   ↓
-朝: P0 → Request Changes / P0 なし → Approve
+Morning: P0 → Request Changes / no P0 → Approve
 ```
 
-これは **reviewer** であり advisor ではない。作業後の非同期品質検証。
+This is a **reviewer**, not an advisor. Asynchronous quality verification after work.
 
-参照: CLAUDE.md「CI/CD: Codex 連携」セクション、`.github/workflows/codex-review.yml`
+Reference: CLAUDE.md "CI/CD: Codex Integration" section, `.github/workflows/codex-review.yml`
 
-## コスト見積もり
+## Cost Estimation
 
-### 計算式
+### Formula
 
 ```
-総コスト = executor コスト + advisor コスト × 呼び出し回数
+total cost = executor cost + advisor cost × number of calls
 
-executor コスト = input_tokens × executor_input_rate + output_tokens × executor_output_rate
-advisor コスト  = advisor_input_tokens × opus_input_rate + advisor_output_tokens × opus_output_rate
+executor cost = input_tokens × executor_input_rate + output_tokens × executor_output_rate
+advisor cost  = advisor_input_tokens × opus_input_rate + advisor_output_tokens × opus_output_rate
 ```
 
-advisor 出力は通常 **400-700 text tokens** (thinking 含め **1,400-1,800 tokens**)。
+Advisor output is typically **400-700 text tokens** (including thinking, **1,400-1,800 tokens**).
 
-### ユースケース別推奨構成
+### Recommended Configurations by Use Case
 
-| ユースケース | Executor | Advisor | Reviewer | 特徴 |
-|------------|----------|---------|----------|------|
-| ドキュメント処理 | Haiku | Opus | — | 低コスト、大量処理向き |
-| コーディング | Sonnet | Opus | — | 品質とコストのバランス |
-| コスト重視 | Haiku | なし | Codex | API advisor なし、事後レビューのみ |
-| 最高品質 | Sonnet | Opus | Codex | 三重防御: 作業中 advisor + 事後 review |
-| 夜間自律実行 | Sonnet | Opus (max_uses: 3) | Codex | コスト制御付き三重防御 |
+| Use Case | Executor | Advisor | Reviewer | Characteristics |
+|----------|----------|---------|----------|-----------------|
+| Document processing | Haiku | Opus | — | Low cost, suited for bulk processing |
+| Coding | Sonnet | Opus | — | Balance of quality and cost |
+| Cost-focused | Haiku | None | Codex | No API advisor, post-hoc review only |
+| Highest quality | Sonnet | Opus | Codex | Triple defense: in-work advisor + post-hoc review |
+| Overnight autonomous run | Sonnet | Opus (max_uses: 3) | Codex | Triple defense with cost control |

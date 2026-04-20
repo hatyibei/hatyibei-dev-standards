@@ -1,70 +1,70 @@
 ---
 allowed-tools: Read, Glob, Grep, Bash(git:*), WebSearch
-description: アーキテクチャ分析・設計・ADR作成（読み取り専用）
-argument-hint: 対象 (例: "認証フロー", "DB設計", overview) デフォルト: overview
+description: Architecture analysis, design, and ADR authoring (read-only)
+argument-hint: target (e.g., "auth flow", "DB design", overview) default: overview
 ---
 
-アーキテクチャの分析と設計を行う。コードは書かない。
+Perform architecture analysis and design. Do not write code.
 
-## モード
+## Modes
 
-- `overview` (デフォルト) → プロジェクト全体のアーキテクチャマップを作成
-- テーマ指定 → 特定領域の深掘り分析
+- `overview` (default) → produce an architecture map for the whole project
+- topic specified → deep-dive analysis on a specific area
 
-## Overview モード
+## Overview Mode
 
-1. ディレクトリ構造を把握
-2. 主要モジュール間の依存関係をマッピング
-3. データフローを追跡
-4. 外部サービス連携を特定
+1. Grasp the directory structure
+2. Map dependencies among major modules
+3. Trace data flows
+4. Identify integrations with external services
 
-出力:
+Output:
 ```
-## Architecture Overview: [プロジェクト名]
+## Architecture Overview: [project name]
 
-### コンポーネント図
-[テキストベースの図]
+### Component Diagram
+[text-based diagram]
 
-### データフロー
-1. ユーザーリクエスト → ...
+### Data Flow
+1. user request → ...
 
-### 外部依存
-- [サービス名]: [用途]
+### External Dependencies
+- [service name]: [purpose]
 
-### 技術スタック
+### Tech Stack
 - Frontend: ...
 - Backend: ...
 - DB: ...
 - Infra: ...
 ```
 
-## テーマ指定モード
+## Topic Mode
 
-1. 対象領域の現在の実装を読む
-2. 選択肢をPros/Consで比較
-3. 推奨を提示
-4. 重要な決定はADRとして文書化
+1. Read the current implementation of the target area
+2. Compare options with Pros/Cons
+3. Present a recommendation
+4. Document significant decisions as ADRs
 
-ADR フォーマット:
+ADR format:
 ```
-## ADR: [タイトル]
+## ADR: [title]
 
-### 状況
-何が問題/課題か
+### Context
+What is the problem/challenge
 
-### 選択肢
-1. **A案** — Pros: ... / Cons: ...
-2. **B案** — Pros: ... / Cons: ...
+### Options
+1. **Option A** — Pros: ... / Cons: ...
+2. **Option B** — Pros: ... / Cons: ...
 
-### 決定
-どの案を選び、なぜか
+### Decision
+Which option and why
 
-### 影響
-この決定で何が変わるか
+### Consequences
+What changes as a result of this decision
 ```
 
-## ルール
+## Rules
 
-- 読み取り専用。ソースコードを作成・変更しない
-- 推奨は実際のコードベースの観察に基づく
-- トレードオフは可能な限り定量化する
+- Read-only. Do not create or modify source code.
+- Recommendations must be grounded in observations of the actual codebase.
+- Quantify trade-offs wherever possible.

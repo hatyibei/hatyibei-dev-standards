@@ -1,64 +1,64 @@
 ---
 allowed-tools: Read, Glob, Grep, WebSearch
-description: 診断タイプに合わせた画像生成プロンプトと格納パスを出力する
-argument-hint: 診断名 (例: bigfive, mbti, disc)
+description: Output image-generation prompts and storage paths tailored to a diagnostic type
+argument-hint: diagnostic name (e.g., bigfive, mbti, disc)
 ---
 
-指定された診断タイプに合わせて、画像生成AIに渡すプロンプトと画像の格納先を出力する。
+For the specified diagnostic type, output the prompts to pass to the image-generation AI and the image storage destinations.
 
-## 重要な前提
+## Important Assumptions
 
-- **画像生成はユーザー（Nanobanana2等）が行う。Claudeはプロンプトと格納パスだけ提供する**
-- 診断コンテンツはクリエイターが作成する（エンドユーザーではない）
-- バズる画像 = ユーモアがある、キャラクター性がある、SNSで共有したくなる
+- **The user performs the image generation (via Nanobanana2 etc.). Claude only provides prompts and storage paths.**
+- Diagnostic content is authored by creators (not end users).
+- Viral images = humor, distinctive characters, makes people want to share on SNS.
 
-## 手順
+## Procedure
 
-1. **診断データの確認**
-   - プロジェクト内の該当診断の定義ファイルを読む
-   - 結果タイプ（性格タイプ等）の一覧を取得
-   - 各タイプの説明文・特徴を確認
+1. **Check diagnostic data**
+   - Read the project's diagnostic definition files
+   - Obtain the list of result types (personality types, etc.)
+   - Verify the description and characteristics of each type
 
-2. **画像種類の決定**
-   - カバー画像（診断トップに表示）: 1枚
-   - 結果タイプ画像（各タイプに対応）: タイプ数分
-   - OGP/SNSシェア用画像: 1枚
+2. **Decide image variants**
+   - Cover image (shown at the top of the diagnostic): 1 image
+   - Result-type images (one per type): equal to the number of types
+   - OGP / SNS share image: 1 image
 
-3. **プロンプト生成ルール**
-   - 人型 or 動物型のキャラクターを中心に
-   - そのタイプの性格特徴を視覚的に表現
-   - MBTIの16性格診断のようなユーモアと個性を意識
-   - 統一感のある絵柄（1つの診断内で絵柄を揃える）
-   - 顔は実在の人物に寄せない（Vertex AI安全基準準拠）
+3. **Prompt generation rules**
+   - Center a humanoid or animal-type character
+   - Visually express the personality traits of that type
+   - Aim for the humor and individuality of MBTI 16-type diagnostics
+   - Consistent art style (unify style within a single diagnostic)
+   - Do not make faces resemble real people (Vertex AI safety standards)
 
-4. **出力フォーマット**
+4. **Output format**
 
 ```
-## 画像生成プロンプト: [診断名]
+## Image Generation Prompts: [diagnostic name]
 
-### 推奨絵柄
-- スタイル: [例: ポップなイラスト風 / フラットデザイン / 水彩画風]
-- カラーパレット: [例: パステル系 / ビビッド系]
-- 統一要素: [例: 全タイプ同じポーズ、背景色で差別化]
+### Recommended Art Style
+- Style: [e.g., pop illustration / flat design / watercolor]
+- Color palette: [e.g., pastel / vivid]
+- Unifying element: [e.g., same pose across all types, differentiated by background color]
 
-### カバー画像
-- **格納先**: `/home/hatyibei/Image/[診断名]/cover.png`
-- **プロンプト**: ...
-- **サイズ**: 1200x630px（OGP兼用）
+### Cover Image
+- **Destination**: `/home/hatyibei/Image/[診断名]/cover.png`
+- **Prompt**: ...
+- **Size**: 1200x630px (also used for OGP)
 
-### タイプ別画像
-#### タイプ1: [タイプ名]
-- **格納先**: `/home/hatyibei/Image/[診断名]/type-[id].png`
-- **プロジェクト内配置**: `public/images/diagnoses/[診断名]/[id].png`
-- **特徴**: [このタイプの性格的特徴]
-- **プロンプト**: ...
+### Per-type Images
+#### Type 1: [type name]
+- **Destination**: `/home/hatyibei/Image/[診断名]/type-[id].png`
+- **In-project location**: `public/images/diagnoses/[診断名]/[id].png`
+- **Traits**: [personality characteristics of this type]
+- **Prompt**: ...
 
-#### タイプ2: [タイプ名]
-...（以下同様）
+#### Type 2: [type name]
+...(same pattern)
 ```
 
-## 参考: バズる画像の特徴
-- SNSでシェアしたくなる「あるある感」
-- タイプごとの差異が一目でわかる
-- テキストなしでも意味が伝わるビジュアル
-- スマホで見ても視認性が高い
+## Reference: Traits of Viral Images
+- A relatable "that's so me" feeling that makes people want to share on SNS
+- Type differences recognizable at a glance
+- Visuals that convey meaning even without text
+- High legibility on mobile
