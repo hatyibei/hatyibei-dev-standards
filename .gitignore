@@ -23,3 +23,13 @@ node_modules/
 .harness/memory/summaries/*.md
 .harness/memory/domains/**/*.md
 .harness/memory/compost/*.md
+
+# Search index (FTS5, tear-down & rebuild なので追跡不要)
+.harness/memory/.index/
+
+# Skill generation candidates (未検証、人間レビュー前は追跡しない)
+skills/_generated/.candidates/
+skills/_generated/*/
+
+# Plans (draft は追跡しない、active/executed のみ)
+plans/*.draft.md
