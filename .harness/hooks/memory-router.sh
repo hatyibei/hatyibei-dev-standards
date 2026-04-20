@@ -28,28 +28,26 @@ TODAY=$(date +%Y-%m-%d)
 HAIKU_MODEL="claude-haiku-4-5-20251001"
 OPUS_MODEL="claude-opus-4-6-20250422"
 
-# --- API呼び出し ---
+# --- API呼び出し (tools/lib/claude-api.sh を共用) ---
 
-call_claude() {
-  local model="$1"
-  local prompt="$2"
-
-  local escaped_prompt
-  escaped_prompt=$(echo "$prompt" | jq -Rs .)
-
-  curl -s https://api.anthropic.com/v1/messages \
-    -H "x-api-key: ${ANTHROPIC_API_KEY}" \
-    -H "anthropic-version: 2023-06-01" \
-    -H "content-type: application/json" \
-    -d "{
-      \"model\": \"${model}\",
-      \"max_tokens\": 512,
-      \"messages\": [{
-        \"role\": \"user\",
-        \"content\": ${escaped_prompt}
-      }]
-    }" 2>/dev/null
-}
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# shellcheck source=/dev/null
+if [ -f "${REPO_ROOT}/tools/lib/claude-api.sh" ]; then
+  CLAUDE_API_MAX_TOKENS=512 source "${REPO_ROOT}/tools/lib/claude-api.sh"
+else
+  # フォールバック: lib が無い環境でも単体動作する
+  call_claude() {
+    local model="$1"
+    local prompt="$2"
+    local escaped_prompt
+    escaped_prompt=$(printf '%s' "$prompt" | jq -Rs .)
+    curl -s https://api.anthropic.com/v1/messages \
+      -H "x-api-key: ${ANTHROPIC_API_KEY}" \
+      -H "anthropic-version: 2023-06-01" \
+      -H "content-type: application/json" \
+      -d "{\"model\":\"${model}\",\"max_tokens\":512,\"messages\":[{\"role\":\"user\",\"content\":${escaped_prompt}}]}" 2>/dev/null
+  }
+fi
 
 # --- 分類プロンプト ---
 
