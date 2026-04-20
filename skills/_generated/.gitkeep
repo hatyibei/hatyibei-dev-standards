@@ -1,0 +1,19 @@
+# skills/_generated/
+
+Opus 自動生成スキル候補の置き場。
+
+- 未検証: ここに入ったものは **PR マージ P0 ブロック対象** (AGENTS.md 参照)
+- 昇格パス: `_generated/` → `extended/skills/` → `core/skills/`
+- 昇格ツール: `bash tools/curation/promote.sh <slug>`
+- クリーンアップ: `bash tools/curation/promote.sh --audit` で 30 日超未昇格を警告
+
+構造:
+```
+_generated/
+├── .candidates/           mine-patterns.sh の出力 (JSON)
+└── YYYY-MM-DD-<slug>/
+    ├── SKILL.md           Opus 生成ドラフト
+    └── META.yml           メタ情報 (status, promoted, ...)
+```
+
+参考: ADR-012
