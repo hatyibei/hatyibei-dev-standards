@@ -1,32 +1,32 @@
 ---
 name: simplify
-description: 変更されたコードのリユース・品質・効率をレビューし、問題を修正する
+description: Review changed code for reuse, quality, and efficiency, then fix any issues found
 origin: plugin (code-simplifier)
 model: opus
 ---
 
-最近変更されたコードを分析し、明瞭さ・一貫性・保守性を向上させる。機能は一切変更しない。
+Analyze recently changed code to improve clarity, consistency, and maintainability. Do not change behavior at all.
 
-## レビュー観点
+## Review lenses
 
-1. **機能保全**: コードの動作は変えない。構造のみ改善
-2. **プロジェクト規約準拠**: CLAUDE.md のコーディング規約に従う
-3. **明瞭性向上**:
-   - 不要な複雑さ・ネストの削減
-   - 冗長なコード・抽象化の除去
-   - 明確な変数名・関数名
-   - 関連ロジックの統合
-   - ネストされた三項演算子の禁止（switch/if-else を使う）
-   - 簡潔さより明確さを優先
-4. **バランス維持**: 過度な簡略化を避ける
-   - 保守性を下げる過度にcleverなコードは書かない
-   - 有用な抽象化は残す
-   - 行数削減より可読性を優先
+1. **Preserve behavior**: don't change how the code runs; only improve structure
+2. **Follow project conventions**: follow the coding rules in CLAUDE.md
+3. **Improve clarity**:
+   - Reduce unneeded complexity / nesting
+   - Remove redundant code / abstractions
+   - Clear variable and function names
+   - Consolidate related logic
+   - No nested ternaries (use switch/if-else)
+   - Prefer clarity over brevity
+4. **Keep balance**: avoid over-simplification
+   - Don't write overly clever code that hurts maintainability
+   - Keep useful abstractions
+   - Prefer readability over line-count reduction
 
-## 実行プロセス
+## Process
 
-1. 最近変更されたコードセクションを特定
-2. 改善の余地を分析（リユース・品質・効率の3軸）
-3. プロジェクト規約に基づいたベストプラクティスを適用
-4. 全機能が変更されていないことを確認
-5. 重要な変更のみドキュメント化
+1. Identify recently changed code sections
+2. Analyze room for improvement (reuse / quality / efficiency)
+3. Apply best practices based on project conventions
+4. Verify all behavior is unchanged
+5. Document only material changes

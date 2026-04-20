@@ -222,5 +222,5 @@ Never skip the RED phase. Never write code before tests.
 
 ## Related
 
-- TDD ワークフローの詳細: `core/skills/e2e-test/SKILL.md` 内の tdd-workflow セクション
-- 実行は `general-purpose` サブエージェントに具体的な指示を渡す形式を推奨
+- TDD workflow details: see the tdd-workflow section in `core/skills/e2e-test/SKILL.md`
+- For execution, prefer passing concrete instructions to the `general-purpose` sub-agent

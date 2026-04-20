@@ -1,78 +1,78 @@
 ---
 name: spec-review
-description: プロダクトの完成度・マネタイズ準備状況を監査する
+description: Audit the product's completeness and monetization readiness
 origin: self
 allowed-tools: Read, Glob, Grep, Bash(curl:*), Bash(gh:*), WebSearch
-argument-hint: "フォーカス (例: billing, ux, security, all) デフォルト: all"
+argument-hint: "focus (e.g. billing, ux, security, all) default: all"
 ---
 
-プロダクトが「お金をもらえるレベル」に達しているかを体系的に監査する。
+Systematically audit whether the product is at a "charge-worthy" level.
 
-## 監査項目
+## Audit items
 
-引数でフォーカスを絞れる。デフォルトは全項目。
+Use the argument to narrow focus. Default is all items.
 
-### 1. 課金フロー (billing)
-- [ ] Stripe Webhookが正しく設定されているか（エンドポイント、イベント種類）
-- [ ] プラン購入 → Firestoreのユーザードキュメント更新が動作するか
-- [ ] プラン別の機能制限が正しく効いているか（ターン数、回答数、画像生成）
-- [ ] 解約フロー（Webhook `customer.subscription.deleted`）の処理
-- [ ] テスト用価格と本番価格の分離
+### 1. Billing flow (billing)
+- [ ] Stripe Webhook is configured correctly (endpoint, event types)
+- [ ] Plan purchase -> Firestore user document update works
+- [ ] Per-plan feature gating works correctly (turns, answer count, image generation)
+- [ ] Cancellation flow (Webhook `customer.subscription.deleted`) is handled
+- [ ] Test vs production prices are separated
 
-### 2. UX / 機能完成度 (ux)
-- [ ] プロフィール画面：編集、アイコン変更、外部リンク（X, YouTube, Instagram, TikTok, Twitch）
-- [ ] フォロー機能：フォロー/アンフォロー、フォロワー数表示、フォロー一覧、通知
-- [ ] 診断フロー：作成 → AI対話 → 結果タイプ生成 → 画像設定 → 公開
-- [ ] 診断受験：質問回答 → 結果表示（未認証でも結果は見せる）
-- [ ] レスポンシブ・モバイル対応
-- [ ] アナリティクス画面の動作
+### 2. UX / feature completeness (ux)
+- [ ] Profile screen: edit, icon change, external links (X, YouTube, Instagram, TikTok, Twitch)
+- [ ] Follow feature: follow/unfollow, follower count display, follow list, notifications
+- [ ] Diagnosis authoring: create -> AI dialogue -> result-type generation -> image setup -> publish
+- [ ] Diagnosis taking: answer questions -> show result (show result even when unauthenticated)
+- [ ] Responsive / mobile
+- [ ] Analytics screen works
 
-### 3. エラーハンドリング (errors)
-- [ ] AI応答中のシンキング表示が途切れないか
-- [ ] 画像生成エラー時のフォールバック
-- [ ] API 502/504 エラーのリトライ・表示
-- [ ] ネットワークエラー時のユーザーフィードバック
+### 3. Error handling (errors)
+- [ ] "Thinking" indicator does not drop during AI responses
+- [ ] Fallback for image generation errors
+- [ ] API 502/504 retry / display
+- [ ] User feedback on network errors
 
-### 4. セキュリティ (security)
-- [ ] 認証が必要なAPIルートの保護
-- [ ] Stripe Webhookの署名検証
-- [ ] プロンプトインジェクション対策（`validatePromptContent`）
-- [ ] Vertex AI安全設定（著名人・医療診断・ネガティブラベリング禁止）
+### 4. Security (security)
+- [ ] Auth-required API routes are protected
+- [ ] Stripe Webhook signature verification
+- [ ] Prompt injection defenses (`validatePromptContent`)
+- [ ] Vertex AI safety settings (ban on celebrity / medical-diagnosis / negative-labeling output)
 
-### 5. 管理機能 (admin)
-- [ ] 管理画面からのプラン付与
-- [ ] ユーザー管理
-- [ ] 運営側診断コンテンツの管理
+### 5. Admin (admin)
+- [ ] Grant plans from admin screen
+- [ ] User management
+- [ ] Manage operator-authored diagnosis content
 
-## 実行手順
+## Procedure
 
-1. コードベース全体を `Glob` + `Grep` で走査
-2. 各項目をコードレベルで検証（実装の有無、エッジケース）
-3. 引数で `billing` など指定された場合はその項目のみ深掘り
+1. Scan the whole codebase with `Glob` + `Grep`
+2. Verify each item at the code level (existence of implementation, edge cases)
+3. If an argument like `billing` is passed, deep-dive only that item
 
-## 出力フォーマット
+## Output format
 
 ```
-## スペックレビュー結果
+## Spec review result
 
-**対象**: [プロジェクト名]
-**総合評価**: リリース可 / 条件付きリリース可 / 未完成
+**Target**: [project name]
+**Overall**: Ship / Ship with conditions / Not ready
 
-### 項目別スコア
-| カテゴリ | ステータス | 完了率 | 致命的な問題 |
+### Per-category score
+| Category | Status | Completion | Blockers |
 |---------|-----------|--------|------------|
-| 課金    | ...       | X/Y    | あり/なし   |
-| UX     | ...       | X/Y    | あり/なし   |
-| ...    | ...       | ...    | ...        |
+| Billing | ...       | X/Y    | yes/no     |
+| UX      | ...       | X/Y    | yes/no     |
+| ...     | ...       | ...    | ...        |
 
-### 致命的な問題（リリースブロッカー）
+### Blockers (release-blocking)
 1. ...
 
-### 改善推奨（リリース後でもOK）
+### Recommended improvements (ok post-release)
 1. ...
 
-### マネタイズ判定
-- 「お金を払う価値がある」と言えるか: はい/いいえ
-- 理由: ...
-- 推奨アクション: ...
+### Monetization verdict
+- Can we say "worth paying for"?: yes/no
+- Reason: ...
+- Recommended action: ...
 ```

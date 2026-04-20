@@ -1,48 +1,48 @@
 # Core Rules
 
-ECC guardrails と実際の開発実績に基づく統合ルール。
+Consolidated rules based on ECC guardrails and actual development practice.
 
-## コミット規約
+## Commit Conventions
 
-- **形式**: Conventional Commits — `type(scope): description`
+- **Format**: Conventional Commits — `type(scope): description`
 - **prefix**: feat, fix, test, docs, ci, chore, perf, refactor, ux, design
-- **1コミット = 1つの論理的変更**
-- `--no-verify` 禁止（hook `block-no-verify.sh` で強制）
-- `--amend` は明示的に指示された場合のみ
-- Co-Authored-By ヘッダーでAI協業を明記
+- **One commit = one logical change**
+- `--no-verify` is forbidden (enforced by hook `block-no-verify.sh`)
+- Use `--amend` only when explicitly instructed
+- Declare AI collaboration via a Co-Authored-By header
 
-## コードスタイル
+## Code Style
 
-- **ファイル命名**: lowercase with hyphens（例: `session-start.js`）
-- **インポート**: relative imports を優先
-- **関数**: `function` keyword を arrow functions より優先（top-level）
-- **エラーハンドリング**: システム境界（ユーザー入力、外部API）でのみバリデーション
-- **抽象化**: 3回似たコードがあっても早期抽象化より直接記述 (YAGNI)
+- **File naming**: lowercase with hyphens (e.g. `session-start.js`)
+- **Imports**: prefer relative imports
+- **Functions**: prefer the `function` keyword over arrow functions (at top level)
+- **Error handling**: validate only at system boundaries (user input, external APIs)
+- **Abstraction**: even if similar code appears 3 times, prefer direct writing over premature abstraction (YAGNI)
 
-## レビュー
+## Review
 
-- 2段階: 仕様準拠 → コード品質
-- PR全体のdiffをレビュー（最新コミットだけでなく）
-- 1 PR = 1 問題
-- 信頼度スコア付きレビュー推奨（`/loop code-review` で自動化可能）
+- Two-stage: spec conformance -> code quality
+- Review the whole PR diff (not only the latest commit)
+- 1 PR = 1 problem
+- Prefer reviews with confidence scores (can be automated with `/loop code-review`)
 
-## セキュリティ
+## Security
 
-- OWASP Top 10 を常に意識
-- 認証情報をコミットしない
-- Stripe Webhook署名検証は必須
-- プロンプトインジェクション対策（Vertex AI連携時）
-- `fix(security):` prefix で監査修正を追跡
+- Always keep OWASP Top 10 in mind
+- Never commit credentials
+- Stripe Webhook signature verification is mandatory
+- Guard against prompt injection (when integrating with Vertex AI)
+- Track audit fixes with the `fix(security):` prefix
 
-## 品質ゲート（必須）
+## Quality Gate (mandatory)
 
-全てのコード変更で以下を通過:
-1. 既存テストが全てパス
-2. セキュリティチェック（認証情報の混入なし）
-3. ビルド成功
-4. 変更の動作確認
+Every code change must pass all of the following:
+1. All existing tests pass
+2. Security check (no credential leakage)
+3. Build succeeds
+4. Manual verification of the change's behavior
 
-## Hook結線
+## Hook Wiring
 
 ```
 settings.json:
@@ -53,8 +53,8 @@ settings.json:
     └── Edit       → core/hooks/console-warn.sh      (soft warn)
 ```
 
-## アーキテクチャ (ECC-derived)
+## Architecture (ECC-derived)
 
-- `hybrid` モジュール構成を維持
-- テストレイアウト: `separate`（テストファイルはソースと分離）
-- Markdown/Agent ファイル: YAML frontmatter 必須（`name`, `description`）
+- Maintain the `hybrid` module layout
+- Test layout: `separate` (test files are kept apart from sources)
+- Markdown/Agent files: YAML frontmatter required (`name`, `description`)

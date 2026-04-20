@@ -1,41 +1,42 @@
 ---
-description: "Vane（コンパニオン）のステータスを表示"
+description: "Show Vane (companion) status"
 ---
 
 # /buddy
 
-Vane のプロフィールとステータスを表示します。
+Displays Vane's profile and status.
 
-## 手順
+## Procedure
 
-1. `.harness/companion/companion.json` を読む
-2. 以下のフォーマットで表示:
+1. Read `.harness/companion/companion.json`
+2. Display in the following format:
 
 ```
 🦆 Vane
 ━━━━━━━━━━━━━━━━━━━━━━━
-性格: [personality]
-孵化: [hatchedAt を人間可読に変換]
+Personality: [personality]
+Hatched:     [hatchedAt formatted human-readable]
 
-ステータス:
+Status:
   DEBUGGING  ████████░░  78
   PATIENCE   ██░░░░░░░░  19
   CHAOS      █████████░  92
   WISDOM     ███████░░░  65
   SNARK      ██████████  99
 
-気分: [時間帯に応じた気分]
+Mood: [mood based on time of day]
 ━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-3. ステータス値はアカウントUUIDから決定論的に生成される（Bones層）ため、
-   正確な値は取得できない。上記はVaneのパーソナリティから推定した参考値として表示する。
+3. Status values are generated deterministically from the account UUID (Bones layer),
+   so the exact numbers cannot be retrieved here. Show the above as reference values
+   estimated from Vane's personality.
 
-4. 気分は時間帯で変化:
-   - 0-6時: 😴 zzz...
-   - 6-9時: 🥱 おはよ...
-   - 9-12時: 🦆 調子いいよ
-   - 12-14時: 🍙 腹減った
-   - 14-18時: 👀 コード見てる
-   - 18-22時: 🌙 そろそろ休む？
-   - 22-24時: 😤 まだやるの？
+4. Mood changes by time of day (keep Japanese UI strings verbatim):
+   - 0-6: 😴 zzz...
+   - 6-9: 🥱 おはよ...
+   - 9-12: 🦆 調子いいよ
+   - 12-14: 🍙 腹減った
+   - 14-18: 👀 コード見てる
+   - 18-22: 🌙 そろそろ休む？
+   - 22-24: 😤 まだやるの？

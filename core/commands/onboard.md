@@ -1,65 +1,65 @@
 ---
 allowed-tools: Read, Glob, Grep, Bash(git:*), Bash(npm:*), Bash(cat:*)
-description: 新しいコードベースを探索して理解する
-argument-hint: フォーカス (例: overview, api, frontend, backend) デフォルト: overview
+description: Explore and understand a new codebase
+argument-hint: focus (e.g. overview, api, frontend, backend) default: overview
 ---
 
-コードベースの構造と設計を理解するための探索を行う。
+Explore a codebase to understand its structure and design.
 
-## 手順
+## Procedure
 
-### 1. 基本情報
+### 1. Basic Information
 
-- CLAUDE.md / README.md を読む
-- `package.json` (or equivalent) で技術スタックを確認
-- ディレクトリ構造を把握
+- Read CLAUDE.md / README.md
+- Check the tech stack via `package.json` (or equivalent)
+- Map out the directory structure
 
-### 2. アーキテクチャ把握
+### 2. Architecture Overview
 
-- エントリーポイントを特定
-- 主要モジュール間の依存関係をトレース
-- データフローを追跡（リクエスト → レスポンス）
-- 外部サービス連携を特定
+- Identify entry points
+- Trace dependencies between major modules
+- Follow data flow (request -> response)
+- Identify external service integrations
 
-### 3. 開発環境
+### 3. Development Environment
 
-- ビルドコマンド
-- テストコマンド
-- 環境変数の必要性
-- CI/CD パイプライン
+- Build commands
+- Test commands
+- Required environment variables
+- CI/CD pipeline
 
-### 4. コード規約
+### 4. Code Conventions
 
-- 使用されているパターン（MVC, hooks, etc.）
-- テストの書き方
-- 命名規則
-- エラーハンドリングパターン
+- Patterns in use (MVC, hooks, etc.)
+- How tests are written
+- Naming conventions
+- Error handling patterns
 
-## 出力
+## Output
 
 ```
-## Codebase Overview: [プロジェクト名]
+## Codebase Overview: [project name]
 
-### 技術スタック
+### Tech Stack
 - Language: ...
 - Framework: ...
 - DB: ...
 - Infra: ...
 
-### 構造
-[ディレクトリツリーと各ディレクトリの責務]
+### Structure
+[Directory tree and the responsibility of each directory]
 
-### エントリーポイント
-- [ファイル]: [説明]
+### Entry Points
+- [file]: [description]
 
-### データフロー
+### Data Flow
 1. ...
 
-### 開発コマンド
+### Development Commands
 - Build: `...`
 - Test: `...`
 - Dev: `...`
 
-### 知っておくべきこと
-- [プロジェクト固有の注意点]
+### Things to Know
+- [project-specific notes and gotchas]
 ```

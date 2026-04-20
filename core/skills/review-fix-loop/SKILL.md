@@ -1,47 +1,47 @@
 ---
 name: review-fix-loop
-description: PR/ブランチをレビュー→修正→再レビューのループで自走させ、人間が張り付かなくても完了まで走り切る
+description: Self-driving loop that runs review -> fix -> re-review on a PR/branch until it converges, so humans don't have to babysit the screen
 origin: self
 allowed-tools: Bash(git:*), Bash(npm:*), Bash(pnpm:*), Bash(yarn:*), Read, Edit, Grep, Glob, Skill
-argument-hint: PR番号 or ブランチ名（省略時は現在のブランチ）
+argument-hint: PR number or branch name (defaults to current branch)
 model: opus
 ---
 
 # Review-Fix Loop
 
-並列作業で「画面に張り付く」のをやめるための自走型 skill。
-PR またはブランチに対して `code-review` → 修正 → 再レビューをループし、
-人間の判断が不要な限り最後まで走り切る。
+Self-driving skill for parallel work, so you stop watching the screen.
+Against a PR or branch, it loops `code-review` -> fix -> re-review,
+and keeps going to the end as long as no human judgment is required.
 
-参考: [Claude Codeの並列作業で「画面に張り付く」をやめるためにやったこと](https://zenn.dev/pepabo/articles/claude-code-stop-watching-parallel-work)
+Reference: [What we did to stop babysitting the screen during parallel Claude Code work](https://zenn.dev/pepabo/articles/claude-code-stop-watching-parallel-work)
 
 ## When to Activate
 
-- 夜間に PR を投げて朝には整った状態で戻ってきてほしい
-- 5〜6 ペインで並列作業中、1 ペインを review-fix に回したい
-- CI/Codex の指摘を一括で潰したい
-- 手動レビューの前段として、機械的に潰せる指摘を先に片付けたい
+- Fire a PR at night and expect it cleaned up by morning
+- Running 5-6 panes in parallel and want one pane dedicated to review-fix
+- Knock out CI/Codex findings in bulk
+- As a pre-step before manual review, to clean up mechanically fixable findings first
 
 ## When NOT to Activate
 
-- アーキテクチャ判断が絡む変更（`advisor-strategy` を使う）
-- 初回の設計レビュー（人間が仕様と照合すべき）
-- セキュリティ脆弱性の根本対応（`security-audit` skill へ）
+- Changes involving architectural judgment (use `advisor-strategy`)
+- Initial design review (a human should cross-check with the spec)
+- Root-cause security vulnerability work (use `security-audit` skill)
 
-## 自走の原則
+## Principles of Self-Driving
 
-1. **人間に問い合わせない**: 曖昧な場合は「判断保留」として記録し、処理を続ける
-2. **範囲を広げない**: タスク外のリファクタ・機能追加をしない
-3. **決定論的な終了条件**: ループは必ず有限回で終わる
-4. **証拠を残す**: 各 iteration の findings と fix を append-only で記録
+1. **Don't ask the human**: if ambiguous, record as "deferred" and continue
+2. **Don't widen scope**: no out-of-task refactors or feature additions
+3. **Deterministic termination**: the loop must terminate in a finite number of iterations
+4. **Leave evidence**: each iteration's findings and fixes are recorded append-only
 
-## 入力
+## Input
 
-- 引数なし → 現在のブランチに紐づく open PR を自動取得
-- PR 番号 → `gh pr view <N>` で対象特定
-- ブランチ名 → `gh pr list --head <branch>` で紐づく PR を取得
+- No args -> auto-detect the open PR tied to the current branch
+- PR number -> locate with `gh pr view <N>`
+- Branch name -> get the linked PR via `gh pr list --head <branch>`
 
-## 実行ループ
+## Execution Loop
 
 ```
 iteration = 1
@@ -52,10 +52,10 @@ while iteration <= MAX_ITERATIONS:
   1. diff = git diff origin/main...HEAD
   2. findings = run_review(diff)           # code-review skill
   3. if no P0/P1 findings:
-       break  # 収束
+       break  # converged
   4. fixable, unfixable = partition(findings)
   5. apply_fixes(fixable)
-  6. run_tests()                           # 品質ゲート
+  6. run_tests()                           # quality gate
   7. if tests fail:
        revert_last_fix()
        mark unfixable
@@ -67,119 +67,119 @@ while iteration <= MAX_ITERATIONS:
 report(findings_log, unfixable)
 ```
 
-## 各ステップの詳細
+## Step Details
 
-### 1. Review フェーズ
+### 1. Review phase
 
-`core/skills/code-review` の観点で diff をレビュー。以下を優先度付きで抽出:
+Review the diff using the `core/skills/code-review` lens. Extract findings with priority:
 
-- **P0** (必ず修正): セキュリティ、型エラー、テスト失敗、ビルドエラー
-- **P1** (修正推奨): 命名、DRY 違反、エラーハンドリング漏れ、マジックナンバー
-- **P2** (記録のみ): スタイル、コメント不足
+- **P0** (must fix): security, type errors, test failures, build errors
+- **P1** (recommended): naming, DRY violations, missing error handling, magic numbers
+- **P2** (record only): style, missing comments
 
-### 2. 分類フェーズ (fixable vs unfixable)
+### 2. Partition phase (fixable vs unfixable)
 
-**Fixable** — 自動修正してよいもの:
-- 命名の一貫性
-- 不要な複雑さの削減（`simplify` skill 相当）
-- エラーハンドリング追加
-- 型アノテーションの修正
-- import 順序・未使用 import
-- Lint/formatter の指摘
+**Fixable** — safe to auto-fix:
+- Naming consistency
+- Unneeded complexity reduction (equivalent to `simplify` skill)
+- Adding error handling
+- Type annotation fixes
+- Import order / unused imports
+- Lint/formatter findings
 
-**Unfixable** — 人間判断が必要なため記録だけして続行:
-- 仕様の解釈が複数あり得る指摘
-- アーキテクチャ変更を要する指摘
-- API の破壊的変更
-- 認証・認可ロジックの変更
+**Unfixable** — record and move on; requires human judgment:
+- Findings with multiple valid spec interpretations
+- Findings requiring architectural changes
+- Breaking API changes
+- Auth/authorization logic changes
 
-### 3. Fix フェーズ
+### 3. Fix phase
 
-1. 各 fixable finding ごとに最小 diff で修正
-2. 変更は1 論理単位 = 1 コミットに分割
-3. Conventional Commits 形式: `fix(scope): ...`, `refactor(scope): ...`
+1. For each fixable finding, apply the minimal diff
+2. Split changes into 1 logical unit = 1 commit
+3. Conventional Commits format: `fix(scope): ...`, `refactor(scope): ...`
 
-### 4. 品質ゲート
+### 4. Quality gate
 
-修正を commit する前に必ず:
-- `npm test` / `pnpm test` / プロジェクト既定のテストコマンド
-- ビルド（設定されていれば）
-- Lint（設定されていれば）
+Before committing a fix, always run:
+- `npm test` / `pnpm test` / project's default test command
+- Build (if configured)
+- Lint (if configured)
 
-いずれかが fail したら:
-1. `git reset --soft HEAD~1` で直前の修正を戻す
-2. その finding を `unfixable` に格下げして log に記録
-3. ループを継続（他の finding はまだ処理できる）
+If any fails:
+1. `git reset --soft HEAD~1` to undo the latest fix
+2. Downgrade that finding to `unfixable` and log it
+3. Continue the loop (other findings may still be processable)
 
-### 5. 終了条件
+### 5. Termination conditions
 
-以下のいずれかで終了:
+Terminate on any of:
 
-| 条件 | 終了理由 |
+| Condition | Reason |
 |------|----------|
-| P0/P1 findings が 0 件 | 収束（成功） |
-| `iteration > MAX_ITERATIONS` | イテレーション上限 |
-| 連続 2 回で新規 finding が出ない | 無限ループ防止 |
-| テスト/ビルドが修正で復旧不能 | 人間介入要求 |
+| 0 P0/P1 findings | Converged (success) |
+| `iteration > MAX_ITERATIONS` | Iteration cap |
+| No new findings for 2 consecutive iterations | Infinite-loop guard |
+| Tests/build unrecoverable by fix | Human intervention required |
 
-## 出力レポート
+## Output report
 
-セッション終了時、ループ全体の結果を以下の形式で標準出力に出す。
-ユーザーが戻ってきて一目でわかることを優先する。
+At session end, emit the loop result to stdout in the format below.
+Optimize for "user comes back and gets it at a glance".
 
 ```markdown
-## Review-Fix Loop 完了
+## Review-Fix Loop complete
 
-**対象**: PR #123 (feat: add payment flow)
-**ブランチ**: feature/payment-flow
+**Target**: PR #123 (feat: add payment flow)
+**Branch**: feature/payment-flow
 **Iterations**: 2 / 3
-**結果**: 収束 ✓ / 上限到達 / 介入要求
+**Result**: Converged / Cap reached / Intervention required
 
-### 修正サマリ
+### Fix summary
 | # | Iteration | Fixed | Commits |
 |---|-----------|-------|---------|
 | 1 | 1         | 4     | 2       |
 | 2 | 2         | 2     | 1       |
 
-### 未対応（人間判断要求）
-- [P1] `src/payment/charge.ts:42` — 3D Secure の扱いが仕様不明
-- [P1] `src/api/webhook.ts:15` — Stripe バージョンの更新可否
+### Open (needs human judgment)
+- [P1] `src/payment/charge.ts:42` — 3D Secure handling unclear in spec
+- [P1] `src/api/webhook.ts:15` — whether to bump Stripe version
 
-### 次のアクション
-- [ ] 上記 unfixable を人間がレビュー
-- [ ] PR に "Ready for human review" ラベルを追加済み
+### Next actions
+- [ ] Human reviews the unfixable items above
+- [ ] "Ready for human review" label has been added to PR
 ```
 
-## 他 skill との連携
+## Interop with other skills
 
-- `code-review` を review フェーズで呼ぶ
-- `simplify` を特定カテゴリの fix で呼ぶ
-- 収束後に `commit-push-pr` を呼んで PR を最新状態に push
+- Call `code-review` during the review phase
+- Call `simplify` for fixes in certain categories
+- After convergence, call `commit-push-pr` to push the PR to its latest state
 
-## 既知の落とし穴
+## Known pitfalls
 
-- **テストがないプロジェクト**: 品質ゲート fail として扱い、修正は diff 目視で保守的に
-- **大量の P2 指摘**: P2 は記録のみ。このループでは修正しない
-- **CI の Codex レビューとの競合**: このループが書いた commit が Codex に再レビューされる。
-  Codex の指摘は次の iteration の入力になる — それが狙い（GAN-Style 交差検証）
+- **Project without tests**: treat as quality-gate fail and fix conservatively by eyeballing the diff
+- **Large P2 volume**: P2 is record-only. This loop does not fix them
+- **Conflict with CI's Codex review**: commits written by this loop get re-reviewed by Codex.
+  Codex's findings become the input to the next iteration — that is the design (GAN-style cross-check)
 
-## 記憶への記録
+## Memory recording
 
-ループ終了時、以下を `.harness/memory/inbox/review-fix-loop-YYYY-MM-DD.md` に append:
+At loop end, append the following to `.harness/memory/inbox/review-fix-loop-YYYY-MM-DD.md`:
 
 ```yaml
 ---
 date: <today>
-pr: <PR番号>
-iterations: <回数>
-fixed_count: <修正件数>
-unfixable: <未対応件数>
-importance: 1.2  # fix 系 +0.2
+pr: <PR number>
+iterations: <count>
+fixed_count: <count>
+unfixable: <count>
+importance: 1.2  # fix family +0.2
 ---
 
-## 今回の学び
-- <パターン化できる指摘があれば記録>
-- <再発しそうな失敗があれば記録>
+## Learnings this time
+- <record any finding that can be patterned>
+- <record any failure likely to recur>
 ```
 
-post-session フックが daily/ に集約する。
+The post-session hook aggregates it into daily/.

@@ -1,87 +1,87 @@
 ---
 name: stripe-debug
-description: Stripe Webhook・課金問題をデバッグする
+description: Debug Stripe Webhook and billing issues
 origin: self
 allowed-tools: Bash(stripe:*), Bash(curl:*), Read, Glob, Grep
-argument-hint: "対象 (例: webhook, subscription, plan) デフォルト: webhook"
+argument-hint: "target (e.g. webhook, subscription, plan) default: webhook"
 ---
 
-Stripeの課金フロー（Webhook、サブスクリプション、プラン反映）の問題を調査・デバッグする。
+Investigate and debug the Stripe billing flow (Webhook, subscriptions, plan propagation).
 
-## 既知の設定情報
+## Known configuration
 
-- Webhookエンドポイント: `https://gen-diag.com/api/stripe/webhook`
-- リッスンイベント: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.created`
+- Webhook endpoint: `https://gen-diag.com/api/stripe/webhook`
+- Listened events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.created`
 
-## デバッグフロー
+## Debug flow
 
-### Webhook デバッグ (webhook)
+### Webhook debugging (webhook)
 
-1. **最近のイベント確認**
+1. **Check recent events**
    ```bash
    stripe events list --limit=10
    ```
 
-2. **Webhook配信状況**
+2. **Webhook delivery status**
    ```bash
    stripe webhook_endpoints list
    ```
 
-3. **失敗イベントの詳細**
+3. **Failed event details**
    ```bash
    stripe events retrieve [EVENT_ID]
    ```
 
-4. **コード側の確認**
-   - `src/app/api/stripe/webhook/route.ts` を読む
-   - 署名検証ロジック（`STRIPE_WEBHOOK_SECRET`）の確認
-   - イベントハンドラの実装確認
+4. **Code-side check**
+   - Read `src/app/api/stripe/webhook/route.ts`
+   - Verify signature validation logic (`STRIPE_WEBHOOK_SECRET`)
+   - Verify event handler implementation
 
-5. **ローカルテスト**
+5. **Local test**
    ```bash
    stripe listen --forward-to localhost:3000/api/stripe/webhook
    stripe trigger checkout.session.completed
    ```
 
-### サブスクリプション確認 (subscription)
+### Subscription check (subscription)
 
-1. **顧客のサブスク状態**
+1. **Customer's subscription status**
    ```bash
    stripe subscriptions list --customer=[CUSTOMER_ID] --limit=5
    ```
 
-2. **Firestoreとの整合性チェック**
-   - Stripe側のプランとFirestore側のユーザードキュメントのプラン情報を比較
+2. **Consistency check with Firestore**
+   - Compare the plan on the Stripe side with the plan info in the Firestore user document
 
-### プラン反映 (plan)
+### Plan propagation (plan)
 
-1. **商品・価格一覧**
+1. **Products & prices**
    ```bash
    stripe products list --limit=10
    stripe prices list --limit=10
    ```
 
-2. **コード側のプラン定義との整合性**
-   - `src/types/billing.ts` のプラン定義を読む
-   - Stripe側のPrice IDとコード側の定義が一致しているか
+2. **Consistency with code-side plan definitions**
+   - Read plan definitions in `src/types/billing.ts`
+   - Confirm Stripe Price IDs match the code definitions
 
-## 出力
+## Output
 
 ```
-## Stripe デバッグ結果
+## Stripe debug result
 
-**調査対象**: [webhook / subscription / plan]
+**Target**: [webhook / subscription / plan]
 
-### 現在の状態
-- Webhookエンドポイント: [正常 / エラー]
-- 最新イベント: [イベント名] ([成功 / 失敗])
-- サブスクリプション: [アクティブ数]
+### Current state
+- Webhook endpoint: [OK / error]
+- Latest event: [event name] ([success / failure])
+- Subscriptions: [active count]
 
-### 発見された問題
+### Issues found
 1. ...
-   - 原因: ...
-   - 修正方法: ...
+   - Cause: ...
+   - Fix: ...
 
-### 推奨アクション
+### Recommended actions
 1. ...
 ```

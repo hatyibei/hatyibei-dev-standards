@@ -1,23 +1,23 @@
 ---
 name: commit-push-pr
-description: コミット、プッシュ、PR作成を一括実行する
+description: Run commit, push, and PR creation in one go
 origin: plugin (commit-commands)
 allowed-tools: Bash(git:*), Bash(gh:*)
 ---
 
-現在の変更をコミットし、リモートにプッシュし、PRを作成する。
+Commit the current changes, push to remote, and open a PR.
 
-## 手順
+## Procedure
 
-1. `git status` と `git diff HEAD` で現在の変更を確認
-2. `git branch --show-current` で現在のブランチを確認
-3. main ブランチにいる場合は新しいブランチを作成
-4. 変更内容に基づいた適切なコミットメッセージで単一コミットを作成
-5. ブランチを origin にプッシュ
-6. `gh pr create` でプルリクエストを作成
+1. Check current changes with `git status` and `git diff HEAD`
+2. Check current branch with `git branch --show-current`
+3. If on main, create a new branch
+4. Create a single commit with a message appropriate for the changes
+5. Push the branch to origin
+6. Create a pull request with `gh pr create`
 
-## ルール
+## Rules
 
-- 全ステップを1つのレスポンスで実行する
-- コミットメッセージは Conventional Commits 形式
-- PR タイトルは70文字以内
+- Execute all steps in one response
+- Commit message uses Conventional Commits
+- PR title stays within 70 characters
