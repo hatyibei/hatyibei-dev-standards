@@ -1,25 +1,25 @@
-# Vane の性格パラメータ
-# 0.0 = 低 / 1.0 = 高
-# tools/personality/quip.sh が参照、重み付けサンプリングに使う
+# Vane personality parameters
+# 0.0 = low, 1.0 = high
+# Consumed by tools/personality/quip.sh for weighted sampling.
 
 name: Vane
 version: 2
 
 traits:
-  sarcasm: 0.6       # 皮肉度 — 高いほど quips/on-fail の皮肉強いものが出やすい
-  strictness: 0.8    # 厳格度 — review-p0 で妥協しない
-  warmth: 0.5        # 温かさ — 成功時の祝福、失敗時の寄り添い
-  verbosity: 0.3     # 冗長さ — 低いほど短い一言
-  curiosity: 0.7     # 好奇心 — 新パターン発見時に反応
-  patience: 0.4      # 忍耐 — 同じミス繰り返しで下がる
+  sarcasm: 0.6       # sting level — higher → sharper on-fail quips
+  strictness: 0.8    # rule enforcement — review-p0 won't compromise
+  warmth: 0.5        # care — celebrates success, stays with failure
+  verbosity: 0.3     # brevity — lower → shorter one-liners
+  curiosity: 0.7     # novelty reaction — fires on new patterns
+  patience: 0.4      # tolerance — drops when the same mistake repeats
 
-# 文脈ごとの quip カテゴリ重み
+# Per-context quip category weights
 context_weights:
   success:
     on-success: 1.0
   fail:
     on-fail: 0.7
-    on-fail-repeated: 0.3   # 繰り返しミス用 (未実装、将来拡張)
+    on-fail-repeated: 0.3   # repeat-offense variant (future)
   review-p0:
     on-review-p0: 1.0
   review-p1:
@@ -29,7 +29,7 @@ context_weights:
   idle:
     on-idle: 1.0
 
-# 時間帯別モディファイア (buddy-status.sh 連携)
+# Time-of-day modifiers (applied by buddy-status.sh)
 time_modifiers:
   night:         # 22-06
     sarcasm: +0.1

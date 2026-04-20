@@ -98,23 +98,23 @@ if [ "$SUMMARIZE" -eq 1 ]; then
   source "${REPO_ROOT}/tools/lib/claude-api.sh"
 
   prompt=$(cat <<EOF
-以下は直近 ${DAYS} 日分の開発ログから抽出した頻出シグナルです。
-繰り返し現れるタスクのうち、**新しい Skill として切り出す価値があるもの** を最大 5 件提案してください。
+Below are recurring signals mined from the last ${DAYS} days of dev logs.
+Suggest up to 5 candidates that are **worth extracting as new Skills**.
 
-## 出力形式 (JSON のみ、説明不要)
+## Output format (JSON only, no explanation)
 {
   "candidates": [
     {
       "slug": "kebab-case-skill-name",
-      "title": "日本語タイトル",
-      "rationale": "なぜ Skill 化すべきか 1-2 文",
-      "trigger": "いつこの Skill を呼ぶべきか",
-      "frequency_hint": "シグナルでの出現頻度"
+      "title": "Human-readable title (Japanese is fine)",
+      "rationale": "Why this deserves a Skill (1-2 sentences)",
+      "trigger": "When this Skill should be invoked",
+      "frequency_hint": "How often it appeared in the signals"
     }
   ]
 }
 
-## シグナル
+## Signals
 $(cat "$OUT")
 EOF
 )

@@ -50,32 +50,33 @@ if [ -f "${REPO_ROOT}/core/skills/deploy/SKILL.md" ]; then
 fi
 
 prompt=$(cat <<EOF
-あなたは hatyibei-dev-standards の Skill 設計者です。
-既存の Skill スタイルに合わせて、新しい Skill の SKILL.md をマークダウンで作成してください。
+You are a Skill designer for hatyibei-dev-standards.
+Draft a new Skill as a SKILL.md in the existing house style.
 
-## 要件
-- YAML frontmatter (name, description, status: proposed, created) 付き
-- セクション: ## 目的 / ## トリガー / ## 手順 / ## アンチパターン / ## 参考
-- 日本語で記述、手順は番号付き
-- **過剰設計禁止**: 既存 core/skills で代替できるなら言及して自重
-- status は必ず "proposed" とする (未検証のため)
+## Requirements
+- YAML frontmatter (name, description, status: proposed, created)
+- Sections: ## Purpose / ## Triggers / ## Procedure / ## Anti-patterns / ## References
+- Numbered procedure
+- **No over-engineering**: if an existing core/skills entry already covers this, say so and stop
+- status MUST be "proposed" (unverified)
+- Body language: English preferred for token efficiency; Japanese is acceptable for user-facing phrasing
 
-## 既存 Skill スタイル (few-shot)
+## Existing Skill style (few-shot)
 \`\`\`markdown
 ${fewshot}
 \`\`\`
 
-## この Skill のスラッグ
+## Slug
 ${SLUG}
 
-## 理由 / 提案元
-${RATIONALE:-（ユーザー指定なし）}
+## Rationale / source
+${RATIONALE:-(not supplied)}
 
-## マイニング時のメタデータ
-${candidate_json:-（該当なし）}
+## Mining metadata
+${candidate_json:-(none)}
 
-## 出力
-SKILL.md の内容のみ。前置きや説明は不要。
+## Output
+The SKILL.md content only. No preamble, no explanation.
 EOF
 )
 

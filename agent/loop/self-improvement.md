@@ -1,89 +1,90 @@
 # Self-Improvement Loop
 
-hermes-agent の "skills auto-generated from sessions" 思想を、hatyibei-dev-standards に接ぎ木した半自動ループ。
-LLM に無人コミットはさせない。常に人間レビューを必須の関門とする。
+A semi-automated loop that grafts hermes-agent's "skills auto-generated from sessions"
+idea onto hatyibei-dev-standards. The LLM is never allowed to commit unattended —
+human review is a mandatory gate.
 
-## ループ全体像
+## Overall flow
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  (1) Observe     日々の開発                              │
-│  ─────────────   │                                       │
-│  セッション中 → .harness/memory/inbox/                    │
-│  SessionEnd   → inbox/ → daily/ (post-session.sh)        │
-│  importance スコア付与 (memory-score.sh)                  │
-│  Haiku 分類     → domains/ (memory-router.sh)            │
+│  (1) Observe     Daily development                       │
+│  ─────────────                                           │
+│  During session → .harness/memory/inbox/                 │
+│  SessionEnd     → inbox/ → daily/ (post-session.sh)      │
+│  Score importance (memory-score.sh)                      │
+│  Classify via Haiku → domains/ (memory-router.sh)        │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│  (2) Mine        頻出パターン抽出                         │
+│  (2) Mine        Extract recurring patterns              │
 │  ────────                                                │
 │  tools/curation/mine-patterns.sh                         │
-│  直近 14 日の daily から decisions/errors/tools を集計    │
-│  --summarize で Haiku がスキル候補を提案                  │
-│  出力: skills/_generated/.candidates/                     │
+│  Aggregate decisions / errors / tools from 14 d of daily │
+│  --summarize lets Haiku propose skill candidates         │
+│  Output: skills/_generated/.candidates/                  │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│  (3) Propose     スキルドラフト生成                       │
+│  (3) Propose     Draft a new skill                       │
 │  ────────                                                │
 │  tools/curation/propose-skill.sh <slug>                  │
-│  Opus が既存 core/skills を few-shot に SKILL.md 生成      │
-│  status: proposed でマーク                                │
-│  出力: skills/_generated/YYYY-MM-DD-<slug>/               │
+│  Opus drafts SKILL.md using existing core/skills as few- │
+│  shot examples. Marks status: proposed.                  │
+│  Output: skills/_generated/YYYY-MM-DD-<slug>/            │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│  (4) Review      人間レビュー (必須)                      │
+│  (4) Review      Human review (required)                 │
 │  ────────                                                │
-│  - 既存 skill との重複チェック                            │
-│  - アンチパターン記述の妥当性                             │
-│  - 例示コマンドの実行確認                                 │
-│  - 過剰設計でないか                                       │
+│  - Check for overlap with existing skills                │
+│  - Validate anti-pattern notes                           │
+│  - Run the example commands                              │
+│  - Guard against over-engineering                        │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│  (5) Promote     extended/ → core/ へ                    │
+│  (5) Promote     extended/ → core/                       │
 │  ─────────                                               │
 │  tools/curation/promote.sh <slug> --target extended       │
-│  チェックリスト表示、手動 git add 必須                     │
-│  core/ 昇格は extended/ で 3 ヶ月発火実績後                │
+│  Shows a checklist; the actual git add is manual         │
+│  core/ promotion requires 3 months of extended/ usage     │
 └─────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────┐
-│  (6) Observe     使用実績を再収集                         │
+│  (6) Observe     Re-measure usage                        │
 │  ─────────                                               │
-│  actually_used.md を四半期ごと更新                        │
-│  未発火スキルは extended → _generated/ に降格または削除    │
+│  Update actually_used.md quarterly                       │
+│  Unused skills: demote extended → _generated/ or delete  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 実行頻度
+## Cadence
 
-| ステップ | 頻度 | 自動/手動 |
-|---------|------|-----------|
-| (1) Observe  | 常時 | 自動 (フック) |
-| (2) Mine     | 週 1 | 手動 (`mine-patterns.sh`) |
-| (3) Propose  | 必要時 | 手動 (`propose-skill.sh <slug>`) |
-| (4) Review   | 必要時 | **人間必須** |
-| (5) Promote  | 必要時 | 手動 (`promote.sh`) |
-| (6) Observe  | 四半期 | 手動 (actually_used.md 更新) |
+| Step | Frequency | Auto / Manual |
+|------|-----------|---------------|
+| (1) Observe  | continuous | auto (hooks) |
+| (2) Mine     | weekly | manual (`mine-patterns.sh`) |
+| (3) Propose  | as needed | manual (`propose-skill.sh <slug>`) |
+| (4) Review   | as needed | **human required** |
+| (5) Promote  | as needed | manual (`promote.sh`) |
+| (6) Observe  | quarterly | manual (update actually_used.md) |
 
-## 禁則事項
+## Prohibitions
 
-- **LLM による自動コミット禁止**: `_generated/` から `extended/` や `core/` への移動は必ず人間が行う
-- **Opus によるループ実行禁止**: `propose-skill.sh` は cron 登録しない (コスト & 品質リスク)
-- **既存 Skill の上書き禁止**: 生成スキルが既存と重複したら `_generated/` で止める
+- **No unattended LLM commits**: promotions from `_generated/` to `extended/` or `core/` must be performed by a human
+- **No Opus-driven loops**: `propose-skill.sh` must not be cron-registered (cost & quality risk)
+- **No overwriting existing skills**: if a proposal overlaps with an existing skill, stop at `_generated/`
 
-## 関連
+## References
 
 - Scripts: `tools/curation/{mine-patterns,propose-skill,promote}.sh`
-- 共用 lib: `tools/lib/claude-api.sh`
+- Shared lib: `tools/lib/claude-api.sh`
 - ADR: [ADR-012](../../docs/adr/ADR-012-hermes-inspired-restructure.md)
-- 昇格基準: [ADR-009](../../docs/adr/ADR-009-core-selection-criteria.md)
-- hermes 比較: [docs/hermes-parity.md](../../docs/hermes-parity.md)
+- Promotion criteria: [ADR-009](../../docs/adr/ADR-009-core-selection-criteria.md)
+- hermes parity map: [docs/hermes-parity.md](../../docs/hermes-parity.md)

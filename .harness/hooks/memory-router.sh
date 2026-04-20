@@ -54,34 +54,34 @@ fi
 build_classification_prompt() {
   local content="$1"
   local escaped_content
-  escaped_content=$(echo "$content" | head -100)  # 先頭100行に制限
+  escaped_content=$(echo "$content" | head -100)  # cap at first 100 lines
 
   cat <<EOF
-以下の開発ログエントリを分類してください。
+Classify the following development log entry.
 
-## 分類ルール
+## Classification rules
 
-### domain (必須、1つ選択)
-- dev: 技術パターン、コード、アーキテクチャ、ツール、デバッグ
-- product: プロダクト固有の機能、UI/UX、ユーザーストーリー
-- biz: ビジネス、組織、戦略、契約、人事
+### domain (required, pick one)
+- dev: technical patterns, code, architecture, tooling, debugging
+- product: product-specific features, UI/UX, user stories
+- biz: business, org, strategy, contracts, HR
 
-### importance (必須、数値)
-基礎: 1.0
-- 意思決定（decided, chose, rejected）: +0.5
-- アーキテクチャ関連: +0.3
-- セキュリティ関連: +0.3
-- エラー・修正関連: +0.2
-- パフォーマンス関連: +0.2
-- コスト関連: +0.2
+### importance (required, numeric)
+Base: 1.0
+- Decision keywords (decided, chose, rejected, 決定, 判断): +0.5
+- Architecture (architect, 設計, ADR, migration): +0.3
+- Security (security, 脆弱性, CVE, XSS): +0.3
+- Errors & fixes (error, bug, fix, 障害): +0.2
+- Performance (latency, cache, 最適化): +0.2
+- Cost (cost, pricing, budget): +0.2
 
-### confidence (必須、0.0-1.0)
-分類の確信度。0.7未満は「判断が難しい」。
+### confidence (required, 0.0-1.0)
+Classification confidence. Below 0.7 means "hard to judge".
 
-## 出力形式（JSON のみ、説明不要）
-{"domain":"dev|product|biz","importance":1.0,"confidence":0.8,"summary":"1行要約"}
+## Output format (JSON only, no explanation)
+{"domain":"dev|product|biz","importance":1.0,"confidence":0.8,"summary":"one-line summary"}
 
-## エントリ
+## Entry
 ${escaped_content}
 EOF
 }

@@ -1,53 +1,56 @@
-# hatyibei 開発標準 — Core Harness
+# hatyibei dev standards — Core Harness
 
-> 12 ヶ月の使用実績ベース ([ADR-009](./docs/adr/ADR-009-core-selection-criteria.md))。**二刀流**: Claude Code (書く) × Codex (検査、`AGENTS.md`)。
+> Distilled from 12 months of usage data ([ADR-009](./docs/adr/ADR-009-core-selection-criteria.md)).
+> **Dual-model**: Claude Code writes, Codex reviews (`AGENTS.md`).
+> Language policy: agent-facing = EN, human-facing = JP ([ADR-012](./docs/adr/ADR-012-hermes-inspired-restructure.md) §6).
 
-## 基本原則
+## Principles
 
-1. **Plan Before Execute** — 書く前に計画
+1. **Plan Before Execute** — draft a plan before writing code
 2. **Test First** — RED → GREEN → REFACTOR
-3. **Verify Before Complete** — 完了宣言前にテスト通過確認
-4. **Evidence Over Claims** — 「動くはず」ではなく「動いた証拠」
+3. **Verify Before Complete** — confirm tests pass before claiming done
+4. **Evidence Over Claims** — not "should work" but "did work"
 
-## 適応的深度
+## Adaptive Depth
 
-- **minimal** (typo/設定): 直接修正 → テスト → コミット
-- **standard** (機能/バグ): 計画 → TDD → レビュー → コミット
-- **comprehensive** (設計変更): ブレスト → 設計 → 計画 → TDD → 2段階レビュー。advisor: [extended/skills/advisor-strategy](./extended/skills/advisor-strategy/SKILL.md)
+- **minimal** (typo, config): edit → test → commit
+- **standard** (feature, bug): plan → TDD → review → commit
+- **comprehensive** (design change): brainstorm → design → plan → TDD → 2-stage review. Advisor: [extended/skills/advisor-strategy](./extended/skills/advisor-strategy/SKILL.md)
 
-## サブエージェント
+## Subagents
 
-- **推奨**: `general-purpose` に具体的ファイルパス+変更内容で委譲 (`Explore`=調査, `planner`=設計)
-- 「調査結果に基づいて修正して」は禁止
+- **Preferred**: delegate to `general-purpose` with concrete file paths + changes (more proven than specialized agents)
+- `Explore` = research, `planner` = design (the only agentType with firing record)
+- Forbidden: "based on your findings, fix it" — always supply paths + exact changes
 
-## 品質ゲート
+## Quality Gates (required)
 
-既存テスト全パス / 認証情報混入なし / ビルド成功 / 動作確認。規約: [core/rules/core-rules.md](./core/rules/core-rules.md)
+All existing tests pass / no secrets in diff / build succeeds / behavior verified. Rules: [core/rules/core-rules.md](./core/rules/core-rules.md)
 
-## 夜間自律実行 (`--dangerously-skip-permissions`)
+## Autonomous Night Mode (`--dangerously-skip-permissions`)
 
-フック 3 本発火: `block-no-verify` (hard fail) / `config-protection` (warn) / `console-warn` (warn)。Conventional Commits 必須、force push to main 禁止。
+Three hooks fire: `block-no-verify` (hard fail), `config-protection` (warn), `console-warn` (warn). Conventional Commits required. Force-push to main is forbidden.
 
-## Codex 連携
+## Codex Integration
 
-`PR → codex-review.yml → AGENTS.md 基準で Codex レビュー`。Secrets に `OPENAI_API_KEY`、導入は `bash install.sh`。
+`PR → codex-review.yml → Codex reviews per AGENTS.md`. Put `OPENAI_API_KEY` in GitHub Secrets. Install in a repo: `bash install.sh`.
 
-## 記憶・想起・自己改善
+## Memory, Recall, Self-Improvement
 
-| Tier | いつ | 対象 |
-|------|------|------|
-| 0 | 朝初回 | weekly summary + 昨日 daily |
-| 1 | 毎回 | CLAUDE.md + core/ |
-| 2-3 | 毎回 | memory/daily today + summaries/ 直近 7 件 |
-| 4 | オンデマンド | `bash tools/search/recall.sh <q>` (FTS5、grep fallback) |
+| Tier | When | Source |
+|------|------|--------|
+| 0 | first session of day | weekly summary + yesterday's daily |
+| 1 | every turn | CLAUDE.md + core/ |
+| 2-3 | every turn | memory/daily today + last 7 summaries |
+| 4 | on demand | `bash tools/search/recall.sh <q>` (FTS5, grep fallback) |
 
-- 記録: `echo "..." > .harness/memory/inbox/<slug>.md` → ルータ: `bash .harness/hooks/memory-router.sh` (Haiku、conf<0.7 で Opus)
-- スキル自動生成 (semi-auto、**LLM 自動コミット禁止**): `tools/curation/{mine-patterns,propose-skill,promote}.sh`
-- Vane: `bash tools/personality/quip.sh {success|fail|review-p0|p1|p2|idle}`
-- 詳細: [ADR-010](./docs/adr/ADR-010-memory-management-layer.md) / [ADR-012](./docs/adr/ADR-012-hermes-inspired-restructure.md) / [self-improvement.md](./agent/loop/self-improvement.md)
+- Record: `echo "..." > .harness/memory/inbox/<slug>.md` → router: `bash .harness/hooks/memory-router.sh` (Haiku classifies; conf<0.7 escalates to Opus)
+- Skill auto-gen (semi-auto, **no LLM auto-commit**): `tools/curation/{mine-patterns,propose-skill,promote}.sh`
+- Vane quips: `bash tools/personality/quip.sh {success|fail|review-p0|p1|p2|idle}`
+- Details: [ADR-010](./docs/adr/ADR-010-memory-management-layer.md) / [ADR-012](./docs/adr/ADR-012-hermes-inspired-restructure.md) / [self-improvement.md](./agent/loop/self-improvement.md)
 
-## ファイル構造
+## Layout
 
-- **不可侵**: `core/` (skills 11 / cmd 4 / planner / hooks 3 / rules) / `extended/` / `archive/` / `.harness/hooks/` / `.harness/memory/*/`
-- **追加 (ADR-012)**: `agent/{personality,loop}/` / `tools/{lib,search,curation,personality}/` / `skills/_generated/` / `plans/` / `cron/`
-- 対応表: [docs/hermes-parity.md](./docs/hermes-parity.md)
+- **Inviolable** (structure/semantics frozen): `core/` (skills 11, cmd 4, planner, hooks 3, rules) / `extended/` / `archive/` / `.harness/hooks/` / `.harness/memory/*/`
+- **Added (ADR-012)**: `agent/{personality,loop}/` / `tools/{lib,search,curation,personality}/` / `skills/_generated/` / `plans/` / `cron/`
+- Parity map: [docs/hermes-parity.md](./docs/hermes-parity.md)
