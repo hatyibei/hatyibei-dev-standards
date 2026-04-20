@@ -1,0 +1,30 @@
+# hatyibei-dev-standards cron jobs (sample)
+#
+# 導入: crontab -e して以下を貼り、HATYIBEI_ROOT を実パスに書き換える。
+# 環境変数: ANTHROPIC_API_KEY は Haiku/Opus 呼び出しに必須 (memory-freshen, memory-router)。
+#
+# 書式: min hour dom mon dow  command
+
+HATYIBEI_ROOT=/home/user/hatyibei-dev-standards
+# ANTHROPIC_API_KEY=sk-ant-...   # 必要なら ~/.bashrc ではなくここに
+
+# --- 記憶管理 (ADR-010) ---
+
+# 毎日 06:00 — 7 日超の daily/ を summaries/ に Haiku 圧縮
+0 6 * * *      bash $HATYIBEI_ROOT/.harness/hooks/memory-freshen.sh
+
+# 毎日 01:00 — importance スコア減衰 (×0.95)
+0 1 * * *      bash $HATYIBEI_ROOT/.harness/hooks/memory-score.sh --decay
+
+# 毎月 1 日 02:00 — 90 日超を compost/ に、365 日超を削除
+0 2 1 * *      bash $HATYIBEI_ROOT/.harness/hooks/memory-compost.sh
+
+# --- 検索インデックス (ADR-012 Phase A) ---
+
+# 6 時間ごと — FTS5 インデックス tear-down & rebuild
+0 */6 * * *    bash $HATYIBEI_ROOT/tools/search/fts-build.sh
+
+# --- スキルキュレーション (ADR-012 Phase B) ---
+
+# 週 1 月曜 09:00 — _generated/ の 30 日超を警告 (標準出力を mail に流す想定)
+0 9 * * 1      bash $HATYIBEI_ROOT/tools/curation/promote.sh --audit
