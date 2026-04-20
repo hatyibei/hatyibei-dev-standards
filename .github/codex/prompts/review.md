@@ -1,41 +1,41 @@
 # PR Review
 
-AGENTS.md の Review guidelines に従い、この PR の差分をレビューしろ。
+Follow the Review guidelines in AGENTS.md and review the diff of this PR.
 
-## 手順
+## Procedure
 
-1. `git diff $BASE_SHA...$HEAD_SHA` で変更差分を取得
-2. 変更されたファイルごとに P0 → P1 → P2 の順でチェック
-3. 必要に応じて周辺コードも読み、false positive を排除
+1. Fetch the diff with `git diff $BASE_SHA...$HEAD_SHA`
+2. For each changed file, check P0 → P1 → P2 in order
+3. Read surrounding code where necessary to avoid false positives
 
-## 判定
+## Verdict
 
-- P0 が 1 つでもある → 冒頭に `## ❌ Request Changes` と書き、P0 を全て列挙
-- P0 なし・P1 あり → 冒頭に `## ✅ Approve (with comments)` と書き、P1 を列挙
-- P0/P1 なし → `## ✅ Approve` と 1 行サマリーのみ
+- Any P0 → start with `## ❌ Request Changes` and list every P0
+- No P0, some P1 → start with `## ✅ Approve (with comments)` and list P1 items
+- No P0/P1 → `## ✅ Approve` plus a one-line summary
 
-## 出力フォーマット
+## Output format
 
 ```
-## [判定]
+## [verdict]
 
 ### P0
-- `ファイル:行` — 指摘内容
-  修正案: ...
+- `file:line` — finding
+  Suggested fix: ...
 
 ### P1
-- `ファイル:行` — 指摘内容
+- `file:line` — finding
 
 ### P2
-- 提案内容
+- Suggestion
 
-### サマリー
-変更の概要（1-2文）
+### Summary
+One or two sentences describing the change.
 ```
 
-## ルール
+## Rules
 
-- 日本語で書け
-- diff に含まれないコードへの指摘は禁止
-- 各指摘に該当コードを引用しろ
-- P0 には必ず修正案を付けろ
+- Write the review body in Japanese (human reviewer language)
+- Do not flag code that is not in the diff
+- Quote the offending code with every finding
+- Every P0 MUST include a suggested fix

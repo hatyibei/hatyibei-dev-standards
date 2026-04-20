@@ -1,62 +1,61 @@
 ---
 name: deploy
-description: Cloud Run / Firebase へのデプロイ＆反映確認を自動化
+description: Automate deploy + verification for Cloud Run / Firebase targets
 origin: self
 allowed-tools: Bash(gcloud:*), Bash(gh:*), Bash(git:*), Bash(curl:*), Read, Glob, Grep
-argument-hint: "対象 (例: cloud-run, firebase, auto) デフォルト: auto"
+argument-hint: "target (e.g. cloud-run, firebase, auto) default: auto"
 ---
 
-プロジェクトをデプロイし、本番環境への反映を確認する。
+Deploy the project and verify the change is live in production.
 
-## プロジェクト判定
+## Target detection
 
-カレントディレクトリから自動判定:
-- `cloudbuild.yaml` がある → Cloud Run デプロイ
-- `firebase.json` がある → Firebase デプロイ
-- 引数で `cloud-run` / `firebase` を明示指定可能
+Detect from the current directory:
+- `cloudbuild.yaml` present → Cloud Run deploy
+- `firebase.json` present → Firebase deploy
+- Explicit arg `cloud-run` / `firebase` overrides detection
 
-## Cloud Run デプロイフロー
+## Cloud Run flow
 
-1. **事前チェック**
-   - `git status` でコミット漏れがないか確認（未コミットがあれば警告）
-   - `npm run typecheck && npm run lint` でビルドエラーチェック
+1. **Pre-checks**
+   - `git status` to confirm nothing is uncommitted (warn if dirty)
+   - `npm run typecheck && npm run lint` to catch build errors early
 
-2. **ビルド送信**
+2. **Submit the build**
    ```bash
    gcloud builds submit --config=cloudbuild.yaml --project=scale-webcoding-service
    ```
 
-3. **ビルド監視**
-   - `gcloud builds list --limit=1 --project=scale-webcoding-service` でポーリング
-   - SUCCESS / FAILURE を検出するまで30秒間隔で監視（最大10分）
+3. **Watch the build**
+   - Poll `gcloud builds list --limit=1 --project=scale-webcoding-service` at 30 s intervals
+   - Stop when status is SUCCESS or FAILURE (max 10 minutes)
 
-4. **反映確認**
-   - `curl -s -o /dev/null -w "%{http_code}" https://gen-diag.com/` でステータスコード確認
-   - 200が返ればデプロイ成功
+4. **Verify live**
+   - `curl -s -o /dev/null -w "%{http_code}" https://gen-diag.com/` → expect 200
 
-5. **GitHub Actions 経由の場合**
-   - `gh run list --limit=1` で最新のワークフロー実行を確認
-   - `gh run watch` で完了まで監視
+5. **If deploy is triggered via GitHub Actions instead**
+   - `gh run list --limit=1` for the latest run
+   - `gh run watch` until completion
 
-## Firebase デプロイフロー
+## Firebase flow
 
 1. `firebase deploy --only hosting`
-2. `curl -s https://gen-diag.com/` で確認
+2. `curl -s https://gen-diag.com/` to confirm
 
-## 結果レポート
+## Result report
 
 ```
-## デプロイ結果
+## Deploy result
 
-**プロジェクト**: [プロジェクト名]
-**方式**: Cloud Run / Firebase
-**ステータス**: 成功 / 失敗
-**本番URL**: https://gen-diag.com/
-**レスポンス**: HTTP [ステータスコード]
-**所要時間**: [X分Y秒]
+**Project**: [project name]
+**Mode**: Cloud Run / Firebase
+**Status**: success / failure
+**Production URL**: https://gen-diag.com/
+**Response**: HTTP [status code]
+**Duration**: [Xm Ys]
 
-### 失敗時の詳細（該当する場合）
-- エラーログ: ...
-- 推定原因: ...
-- 修正提案: ...
+### Failure detail (if applicable)
+- Error log: ...
+- Probable cause: ...
+- Suggested fix: ...
 ```
