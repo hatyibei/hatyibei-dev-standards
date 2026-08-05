@@ -30,7 +30,8 @@ core/                      実績ベースの装備 (不可侵, 18 files)
   skills/                  11 skills (deploy, ux-audit, security-audit, ...)
   commands/                4 commands (plan, tdd, build-fix, onboard)
   agents/                  1 agent (planner)
-  hooks/                   3 hooks (block-no-verify, config-protection, console-warn)
+  hooks/                   4 hooks (block-no-verify, config-protection, console-warn,
+                           adversarial-review-gate)
   rules/                   1 file (core-rules.md)
 
 extended/                  参照専用 (不可侵)
