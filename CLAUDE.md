@@ -26,7 +26,7 @@
 
 ## 夜間自律実行 (`--dangerously-skip-permissions`)
 
-フック 3 本発火: `block-no-verify` (hard fail) / `config-protection` (warn) / `console-warn` (warn)。Conventional Commits 必須、force push to main 禁止。
+フック 4 本発火: `block-no-verify` (hard fail) / `adversarial-review-gate` (hard fail) / `config-protection` (warn) / `console-warn` (warn)。Conventional Commits 必須、force push to main 禁止。
 
 ## Codex 連携
 
@@ -48,6 +48,6 @@
 
 ## ファイル構造
 
-- **不可侵**: `core/` (skills 11 / cmd 4 / planner / hooks 3 / rules) / `extended/` / `archive/` / `.harness/hooks/` / `.harness/memory/*/`
+- **不可侵**: `core/` (skills 11 / cmd 4 / planner / hooks 4 / rules) / `extended/` / `archive/` / `.harness/hooks/` / `.harness/memory/*/`
 - **追加 (ADR-012)**: `agent/{personality,loop}/` / `tools/{lib,search,curation,personality}/` / `skills/_generated/` / `plans/` / `cron/`
 - 対応表: [docs/hermes-parity.md](./docs/hermes-parity.md)
